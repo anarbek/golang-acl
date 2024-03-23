@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: golang-acl-load-balancer
+  labels:
+    app: golang-acl-web
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 8082
+    targetPort: 8081
+  selector:
+    app: golang-acl-web

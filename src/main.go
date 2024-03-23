@@ -14,6 +14,7 @@ import (
 
 	"example/hello/models"
 	"example/hello/repositories"
+	"math/rand"
 )
 
 var privateThings = map[string]map[int64]string{
@@ -110,10 +111,12 @@ func loginUser(c *gin.Context) {
 
 	// If the user was found, generate a JWT and include the user's RoleID in the claims
 	if user.ID != 0 {
+		expirationTime := time.Now().Add(1 * time.Hour) // Token expires after 1 hours
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 			"user":   user.Name,
 			"userId": user.ID,
-			"nbf":    time.Date(2018, 01, 01, 12, 0, 0, 0, time.UTC).Unix(),
+			"nbf":    time.Now().Unix(),     // Set 'nbf' to now
+			"exp":    expirationTime.Unix(), // Add the 'exp' claim
 		})
 
 		tokenStr, err := token.SignedString([]byte("supersaucysecret"))
@@ -321,16 +324,23 @@ func privateACLCheckUser(c *gin.Context, pageName string, read, write bool) {
 }
 
 func main() {
-
+	number = rand.Intn(100) // Generate a random number between 0 and 99
 	router := gin.New()
 	router.GET("/", index)
+	router.GET("/rnd", func(c *gin.Context) {
+		c.String(http.StatusOK, "(2)Random number: %d", number)
+	})
+	router.Use(privateACLCheckUserWrapper("UserManagement", true, false)).GET("/rndAuth", func(c *gin.Context) {
+		c.String(http.StatusOK, "(2)Random number: %d", number)
+	})
+
 	router.POST("/login", login)
 	router.POST("/loginUser", loginUser)
 
 	privateRouter := router.Group("/private")
 	privateRouter.Use(jwtTokenCheck)
 	privateRouter.Use(privateACLCheck).GET("/:uid/:pid", private)
-
+	users.SetRand(number)
 	v1 := router.Group("/api/v1")
 	{
 		usersRoutes := v1.Group("/users")
@@ -344,4 +354,10 @@ func main() {
 	}
 
 	router.Run(":8081")
+}
+
+var number int
+
+func init() {
+	rand.Seed(time.Now().UnixNano())
 }
