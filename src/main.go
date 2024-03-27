@@ -7,13 +7,11 @@ import (
 	"strings"
 	"time"
 
-	"example/hello/users"
-
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 
-	"example/hello/models"
 	"example/hello/repositories"
+	"example/hello/users"
 	"math/rand"
 )
 
@@ -91,6 +89,7 @@ func login(c *gin.Context) {
 	})
 }
 
+/*
 func loginUser(c *gin.Context) {
 	type loginUser struct {
 		Username string `json:"username,omitempty"`
@@ -137,7 +136,7 @@ func loginUser(c *gin.Context) {
 	c.JSON(http.StatusBadRequest, UnsignedResponse{
 		Message: "bad username",
 	})
-}
+}*/
 
 func extractBearerToken(header string) (string, error) {
 	if header == "" {
@@ -238,6 +237,7 @@ func privateACLCheck(c *gin.Context) {
 	c.Next()
 }
 
+/*
 func privateACLCheckUserWrapper(pageName string, read, write bool) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		privateACLCheckUser(c, pageName, read, write)
@@ -321,35 +321,39 @@ func privateACLCheckUser(c *gin.Context, pageName string, read, write bool) {
 	}
 
 	c.Next()
-}
+}*/
 
 func main() {
+	handler := &users.MyUserHandler{}
+	acl := repositories.AclAbstract{}
+	handler.Init(&acl)
 	number = rand.Intn(100) // Generate a random number between 0 and 99
 	router := gin.New()
 	router.GET("/", index)
 	router.GET("/rnd", func(c *gin.Context) {
 		c.String(http.StatusOK, "(2)Random number: %d", number)
 	})
-	router.Use(privateACLCheckUserWrapper("UserManagement", true, false)).GET("/rndAuth", func(c *gin.Context) {
-		c.String(http.StatusOK, "(2)Random number: %d", number)
-	})
 
 	router.POST("/login", login)
-	router.POST("/loginUser", loginUser)
+	router.POST("/loginUser", handler.LoginUser)
+	/*router.Use(handler.PrivateACLCheckUserWrapper("UserManagement", true, false)).GET("/rndAuth", func(c *gin.Context) {
+		c.String(http.StatusOK, "(2)Random number: %d", number)
+	})*/
 
 	privateRouter := router.Group("/private")
 	privateRouter.Use(jwtTokenCheck)
 	privateRouter.Use(privateACLCheck).GET("/:uid/:pid", private)
-	users.SetRand(number)
+
+	handler.SetRand(number)
 	v1 := router.Group("/api/v1")
 	{
 		usersRoutes := v1.Group("/users")
 		{
-			usersRoutes.Use(privateACLCheckUserWrapper("UserManagement", true, false)).GET("/", users.GetAll)
+			usersRoutes.Use(handler.PrivateACLCheckUserWrapper("UserManagement", true, false)).GET("/", handler.GetAll)
 		}
 		subjectRoutes := v1.Group("/subjects")
 		{
-			subjectRoutes.Use(privateACLCheckUserWrapper("SubjectManagement", true, false)).GET("/", users.GetAll)
+			subjectRoutes.Use(handler.PrivateACLCheckUserWrapper("SubjectManagement", true, false)).GET("/", handler.GetAll)
 		}
 	}
 

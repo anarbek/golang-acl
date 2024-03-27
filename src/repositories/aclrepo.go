@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"example/hello/models"
+	"fmt"
 )
 
 var Roles = []models.Role{
@@ -26,7 +27,10 @@ var Users = []models.User{
 	{ID: 2, Name: "Jane Doe", Email: "jane@example.com", RoleID: 2},
 }
 
-func UsersWithRoles() []models.User {
+type AclAbstract struct {
+}
+
+func (acl *AclAbstract) UsersWithRoles() []models.User {
 	// Create a map of roles for quick lookup
 	roleMap := GetRoleMap()
 	// Create a new slice of users with roles
@@ -37,6 +41,11 @@ func UsersWithRoles() []models.User {
 	}
 
 	return usersWithRoles
+}
+
+func (acl *AclAbstract) Users() []models.User {
+	fmt.Println("users requested!")
+	return Users
 }
 
 func GetPolicyMap() map[int]models.Policy {
@@ -70,6 +79,11 @@ func GetRoleMap() map[int]models.Role {
 	return roleMap
 }
 
+func getRolePolicies(roleID int) []models.RolePolicy {
+	policyMap := GetPolicyMap()
+	return getRolePoliciesInner(roleID, policyMap)
+}
+
 // This function takes a RoleID and returns a slice of RolePolicies for that role
 func getRolePoliciesInner(roleID int, policyMap map[int]models.Policy) []models.RolePolicy {
 	var rolePolicies []models.RolePolicy
@@ -80,11 +94,6 @@ func getRolePoliciesInner(roleID int, policyMap map[int]models.Policy) []models.
 		}
 	}
 	return rolePolicies
-}
-
-func getRolePolicies(roleID int) []models.RolePolicy {
-	policyMap := GetPolicyMap()
-	return getRolePoliciesInner(roleID, policyMap)
 }
 
 func GetRole(roleID int) models.Role {
