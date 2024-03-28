@@ -1,0 +1,84 @@
+pipeline {
+    environment {
+        CREDENTIALS_ID = "The-Key-Name"
+        GIT_BRANCH = "main"
+        GIT_SOURCE = "https://github.com/anarbek/golang-acl.git"
+        
+        REPO_PATH = "repo"
+        SOURCE_PATH = "source"
+        TARGET_PATH = "target"
+        
+        PUBLISH_PATH = "$WORKSPACE/$TARGET_PATH/published"
+        STORE_PUBLISH_PATH = "$PUBLISH_PATH/golangCmsFinal"
+        IMAGE_PUBLISH_LOCATION = "golangCmsImage"
+    }
+    agent any 
+    parameters {
+        string(name: 'DOCKER_IMAGE_VERSION', defaultValue: '1.0', description: 'Docker image version')
+    }
+    stages {
+        stage('Delete Source Path') {
+            steps {
+                echo 'Deleting $SOURCE_PATH' 
+                dir (SOURCE_PATH) {
+                   deleteDir()
+                }
+            }
+        }
+        stage ('Clean workspace') {
+          steps {
+            cleanWs()
+          }
+        }
+        stage ('Git Checkout') {
+          steps {
+            dir (REPO_PATH) {
+               git branch: GIT_BRANCH, url: GIT_SOURCE
+               sh 'cp -Rp ../$REPO_PATH ../$SOURCE_PATH'
+            }
+          }
+        }
+        stage ('Get Dependencies') {
+          steps {
+            dir ("${REPO_PATH}/src") {
+                sh 'go mod download'
+            }
+          }
+        }
+        stage ('Build') {
+          steps {
+            dir ("${REPO_PATH}/src") {
+                echo "go build -o ${workspace}/myapp"
+                sh 'go build -o ${workspace}/myapp'
+            }
+          }
+        }
+        stage ('Tests') {
+          steps {
+            dir ("${REPO_PATH}/src") {
+                sh 'go test ./...'
+            }
+          }
+        }
+        stage ('Publish') {
+          steps {
+            dir ("${REPO_PATH}/src") {
+                sh 'mkdir -p "$STORE_PUBLISH_PATH"'
+                sh 'cp "${workspace}/myapp" "$STORE_PUBLISH_PATH"'
+            }
+          }
+        }
+        stage ('Dockerize') {
+          steps {
+              script {
+                  if(params.DeployToDocker){
+                      dir ("${REPO_PATH}/src") {
+                            sh "docker build -t 'golang-nr-cms:${params.DOCKER_IMAGE_VERSION}' ."
+                            sh "docker save -o '$STORE_PUBLISH_PATH/golang-nr-cms.tar' 'golang-nr-cms:${params.DOCKER_IMAGE_VERSION}'"
+                      }
+                  }
+              }
+          }
+        }
+    }
+}
