@@ -1,8 +1,8 @@
 package repositories
 
 import (
-	"example/hello/models"
 	"fmt"
+	"gokg/gomvc/models"
 	"sync"
 )
 

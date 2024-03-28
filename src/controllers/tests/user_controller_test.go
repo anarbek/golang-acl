@@ -9,8 +9,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 
-	"example/hello/controllers"
-	"example/hello/repositories"
+	"gokg/gomvc/controllers"
+	"gokg/gomvc/repositories"
 )
 
 type TestSetup struct {

@@ -1,7 +1,7 @@
 package users
 
 import (
-	"example/hello/repositories"
+	"gokg/gomvc/repositories"
 	"net/http"
 	"time"
 

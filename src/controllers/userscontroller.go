@@ -1,8 +1,8 @@
 package controllers
 
 import (
-	"example/hello/models"
-	"example/hello/repositories"
+	"gokg/gomvc/models"
+	"gokg/gomvc/repositories"
 	"net/http"
 	"strconv"
 

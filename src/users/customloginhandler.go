@@ -2,12 +2,12 @@ package users
 
 import (
 	"errors"
-	"example/hello/repositories"
+	"gokg/gomvc/repositories"
 	"net/http"
 	"strings"
 	"time"
 
-	"example/hello/models"
+	"gokg/gomvc/models"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"

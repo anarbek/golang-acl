@@ -1,4 +1,4 @@
-module example/hello
+module gokg/gomvc
 
 go 1.19
 

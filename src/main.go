@@ -7,9 +7,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"example/hello/controllers"
-	"example/hello/repositories"
-	"example/hello/users"
+	"gokg/gomvc/controllers"
+	"gokg/gomvc/repositories"
+	"gokg/gomvc/users"
 	"math/rand"
 )
 
