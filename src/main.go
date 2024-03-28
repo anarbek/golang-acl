@@ -1,15 +1,13 @@
 package main
 
 import (
-	"errors"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v5"
 
+	"example/hello/controllers"
 	"example/hello/repositories"
 	"example/hello/users"
 	"math/rand"
@@ -28,14 +26,14 @@ var privateThings = map[string]map[int64]string{
 	},
 }
 
-type UnsignedResponse struct {
+/*type UnsignedResponse struct {
 	Message interface{} `json:"message"`
 }
 
 type SignedResponse struct {
 	Token   string `json:"token"`
 	Message string `json:"message"`
-}
+}*/
 
 func index(c *gin.Context) {
 	c.JSON(200, gin.H{"msg": "indexMain"})
@@ -55,7 +53,7 @@ func private(c *gin.Context) {
 	c.JSON(200, gin.H{"msg": "unknown pid"})
 }
 
-func login(c *gin.Context) {
+/*func login(c *gin.Context) {
 	type login struct {
 		Username string `json:"username,omitempty"`
 	}
@@ -71,23 +69,23 @@ func login(c *gin.Context) {
 
 		tokenStr, err := token.SignedString([]byte("supersaucysecret"))
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, UnsignedResponse{
+			c.JSON(http.StatusInternalServerError, users.UnsignedResponse{
 				Message: err.Error(),
 			})
 			return
 		}
 
-		c.JSON(http.StatusOK, SignedResponse{
+		c.JSON(http.StatusOK, users.SignedResponse{
 			Token:   tokenStr,
 			Message: "logged in",
 		})
 		return
 	}
 
-	c.JSON(http.StatusBadRequest, UnsignedResponse{
+	c.JSON(http.StatusBadRequest, users.UnsignedResponse{
 		Message: "bad username",
 	})
-}
+}*/
 
 /*
 func loginUser(c *gin.Context) {
@@ -138,7 +136,7 @@ func loginUser(c *gin.Context) {
 	})
 }*/
 
-func extractBearerToken(header string) (string, error) {
+/*func extractBearerToken(header string) (string, error) {
 	if header == "" {
 		return "", errors.New("bad header value given")
 	}
@@ -235,7 +233,7 @@ func privateACLCheck(c *gin.Context) {
 	}
 
 	c.Next()
-}
+}*/
 
 /*
 func privateACLCheckUserWrapper(pageName string, read, write bool) gin.HandlerFunc {
@@ -324,9 +322,10 @@ func privateACLCheckUser(c *gin.Context, pageName string, read, write bool) {
 }*/
 
 func main() {
-	handler := &users.MyUserHandler{}
-	acl := repositories.AclAbstract{}
-	handler.Init(&acl)
+	handler := &users.CustomLoginHandler{}
+	handlerExample := &users.InitialLoginHandler{}
+	acl := repositories.NewAclAbstract()
+	handler.Init(acl)
 	number = rand.Intn(100) // Generate a random number between 0 and 99
 	router := gin.New()
 	router.GET("/", index)
@@ -334,26 +333,32 @@ func main() {
 		c.String(http.StatusOK, "(2)Random number: %d", number)
 	})
 
-	router.POST("/login", login)
+	router.POST("/login", handlerExample.LoginUser)
 	router.POST("/loginUser", handler.LoginUser)
 	/*router.Use(handler.PrivateACLCheckUserWrapper("UserManagement", true, false)).GET("/rndAuth", func(c *gin.Context) {
 		c.String(http.StatusOK, "(2)Random number: %d", number)
 	})*/
 
 	privateRouter := router.Group("/private")
-	privateRouter.Use(jwtTokenCheck)
-	privateRouter.Use(privateACLCheck).GET("/:uid/:pid", private)
+	//privateRouter.Use(jwtTokenCheck)
+	privateRouter.Use(handlerExample.PrivateACLCheckUserWrapper("UserManagement", true, false)).GET("/:uid/:pid", private)
 
 	handler.SetRand(number)
 	v1 := router.Group("/api/v1")
 	{
 		usersRoutes := v1.Group("/users")
 		{
-			usersRoutes.Use(handler.PrivateACLCheckUserWrapper("UserManagement", true, false)).GET("/", handler.GetAll)
+			usersController := &controllers.UserController{}
+			usersController.Init(acl)
+			usersRoutes.Use(handler.PrivateACLCheckUserWrapper("UserManagement", true, false)).GET("/", usersController.GetAll)
+			usersRoutes.Use(handler.PrivateACLCheckUserWrapper("UserManagement", true, true)).POST("insert", usersController.InsertUser)
+			usersRoutes.Use(handler.PrivateACLCheckUserWrapper("UserManagement", true, true)).POST("update", usersController.UpdateUser)
+			usersRoutes.Use(handler.PrivateACLCheckUserWrapper("UserManagement", true, true)).DELETE("delete/:id", usersController.DeleteUser)
 		}
 		subjectRoutes := v1.Group("/subjects")
 		{
-			subjectRoutes.Use(handler.PrivateACLCheckUserWrapper("SubjectManagement", true, false)).GET("/", handler.GetAll)
+			usersController := &controllers.UserController{}
+			subjectRoutes.Use(handler.PrivateACLCheckUserWrapper("SubjectManagement", true, false)).GET("/", usersController.GetAll)
 		}
 	}
 

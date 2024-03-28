@@ -22,37 +22,37 @@ type SignedResponse struct {
 	Message string `json:"message"`
 }
 
-// UserHandler defines the interface for user operations
-type UserHandler interface {
+// ILoginHandler defines the interface for user operations
+type ILoginHandler interface {
 	SetRand(_num int)
-	GetAll(c *gin.Context)
+	//GetAll(c *gin.Context)
 	LoginUser(c *gin.Context)
 	PrivateACLCheckUserWrapper(pageName string, read, write bool) gin.HandlerFunc
 }
 
-type MyUserHandler struct {
+type CustomLoginHandler struct {
 	num int
 	acl *repositories.AclAbstract
 }
 
-func (h *MyUserHandler) Init(_acl *repositories.AclAbstract) {
+func (h *CustomLoginHandler) Init(_acl *repositories.AclAbstract) {
 	h.acl = _acl
 }
 
-func (h *MyUserHandler) SetRand(_num int) {
+func (h *CustomLoginHandler) SetRand(_num int) {
 	h.num = _num
 }
 
-func (h *MyUserHandler) GetAll(c *gin.Context) {
+/*func (h *CustomLoginHandler) GetAll(c *gin.Context) {
 	users := h.acl.UsersWithRoles()
 	for _, user := range users {
 		user.CurrNum = h.num
 	}
 	// implement your logic here
 	c.JSON(200, users)
-}
+}*/
 
-func (h *MyUserHandler) LoginUser(c *gin.Context) {
+func (h *CustomLoginHandler) LoginUser(c *gin.Context) {
 	type loginUser struct {
 		Username string `json:"username,omitempty"`
 	}
@@ -100,13 +100,13 @@ func (h *MyUserHandler) LoginUser(c *gin.Context) {
 	})
 }
 
-func (h *MyUserHandler) PrivateACLCheckUserWrapper(pageName string, read, write bool) gin.HandlerFunc {
+func (h *CustomLoginHandler) PrivateACLCheckUserWrapper(pageName string, read, write bool) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		privateACLCheckUser(c, h, pageName, read, write)
 	}
 }
 
-func privateACLCheckUser(c *gin.Context, h *MyUserHandler, pageName string, read, write bool) {
+func privateACLCheckUser(c *gin.Context, h *CustomLoginHandler, pageName string, read, write bool) {
 	jwtToken, err := extractBearerToken(c.GetHeader("Authorization"))
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, UnsignedResponse{
@@ -165,14 +165,19 @@ func privateACLCheckUser(c *gin.Context, h *MyUserHandler, pageName string, read
 	hasPolicy := false
 	for _, rp := range role.RolePolicies {
 		if rp.Policy.Name == pageName {
-			if write && rp.Write {
-				hasPolicy = true
+			if write && !rp.Write {
+				// If write access is required but the user doesn't have it, deny access
+				hasPolicy = false
 				break
 			}
-			if read && rp.Read {
-				hasPolicy = true
+			if read && !rp.Read {
+				// If read access is required but the user doesn't have it, deny access
+				hasPolicy = false
 				break
 			}
+			// If none of the above conditions were met, the user has the required access
+			hasPolicy = true
+			break
 		}
 	}
 
