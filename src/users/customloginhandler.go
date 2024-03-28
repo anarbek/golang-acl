@@ -142,7 +142,7 @@ func privateACLCheckUser(c *gin.Context, h *CustomLoginHandler, pageName string,
 	claimedUserIDInt := int(claimedUserID)
 	// Get the user from the Users slice
 	var user models.User
-	users := h.acl.Users()
+	users := h.acl.UsersAll()
 	for _, u := range users {
 		if u.ID == claimedUserIDInt {
 			user = u
@@ -187,7 +187,7 @@ func privateACLCheckUser(c *gin.Context, h *CustomLoginHandler, pageName string,
 		})
 		return
 	}
-
+	c.Set("user", user)
 	c.Next()
 }
 

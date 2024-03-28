@@ -26,8 +26,29 @@ func (u *UserController) GetAll(c *gin.Context) {
 	c.JSON(200, users)
 }
 
+func GetLoggedInUser(c *gin.Context) (value *models.User, ok bool) {
+	loggedInUserInterface, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "No user in context"})
+		ok = false
+	}
+	// Perform a type assertion to convert loggedInUser to *models.User
+	loggedInUser, ok := loggedInUserInterface.(*models.User)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to assert user"})
+		ok = false
+	}
+	value = loggedInUser
+	return value, ok
+}
+
 // Insert a new user
 func (u *UserController) InsertUser(c *gin.Context) {
+	loggedInUser, ok := GetLoggedInUser(c)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to assert user"})
+		return
+	}
 	// Parse the user from the request
 	var user models.User
 	if err := c.ShouldBindJSON(&user); err != nil {
@@ -36,7 +57,7 @@ func (u *UserController) InsertUser(c *gin.Context) {
 	}
 
 	// Insert the user using the acl
-	if err := u.acl.InsertUser(&user); err != nil {
+	if err := u.acl.InsertUser(&user, loggedInUser); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -46,6 +67,11 @@ func (u *UserController) InsertUser(c *gin.Context) {
 
 // Update an existing user
 func (u *UserController) UpdateUser(c *gin.Context) {
+	loggedInUser, ok := GetLoggedInUser(c)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to assert user"})
+		return
+	}
 	// Parse the user from the request
 	var user models.User
 	if err := c.ShouldBindJSON(&user); err != nil {
@@ -54,7 +80,7 @@ func (u *UserController) UpdateUser(c *gin.Context) {
 	}
 
 	// Update the user using the acl
-	if err := u.acl.UpdateUser(&user); err != nil {
+	if err := u.acl.UpdateUser(&user, loggedInUser); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -64,6 +90,11 @@ func (u *UserController) UpdateUser(c *gin.Context) {
 
 // Delete a user
 func (u *UserController) DeleteUser(c *gin.Context) {
+	loggedInUser, ok := GetLoggedInUser(c)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to assert user"})
+		return
+	}
 	// Get the user ID from the URL
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
@@ -73,7 +104,7 @@ func (u *UserController) DeleteUser(c *gin.Context) {
 	}
 
 	// Delete the user using the acl
-	if err := u.acl.DeleteUser(id); err != nil {
+	if err := u.acl.DeleteUser(id, loggedInUser); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
