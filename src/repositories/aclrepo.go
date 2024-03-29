@@ -63,6 +63,7 @@ func (aclBase *AclBase) Users(loggedInUser *models.User) []models.User {
 }
 
 func (aclBase *AclBase) InsertUser(user, loggedInUser *models.User) error {
+	user.TenantID = loggedInUser.TenantID
 	// Check the role permissions
 	if err := checkRolePermissions(user, loggedInUser); err != nil {
 		return err
@@ -164,8 +165,18 @@ func checkRolePermissions(user, loggedInUser *models.User) error {
 		// Superadmin can operate any user with any role
 	case models.RolesTenant:
 		// Tenant can only operate users with RoleNames: "Admin" and "User"
-		if userToUpdateRole.Name != models.RolesAdmin && userToUpdateRole.Name != models.RolesUser {
-			return LogErr("tenant cannot operate user with role %v", userToUpdateRole.Name)
+		if userToUpdateRole.Name == models.RolesSuperadmin {
+			return LogErr("Tenant cannot work with superadmin")
+		} else if userToUpdateRole.Name == models.RolesTenant {
+			if user.ID != loggedInUser.ID {
+				return LogErr("Tenant can work only with its own user")
+			}
+			return nil
+		}
+		if userToUpdateRole.Name == models.RolesAdmin || userToUpdateRole.Name == models.RolesUser {
+			if user.TenantID != loggedInUser.TenantID {
+				return LogErr("tenant cannot operate user with role %v of other tenant", userToUpdateRole.Name)
+			}
 		}
 	case models.RolesAdmin:
 		// Admin can only operate users with RoleName: "User"
@@ -226,9 +237,9 @@ func (acl *AclAbstract) UpdateUser(user, loggedInUser *models.User) error {
 			}
 			// Update the user
 			Users[i] = *user
-
 			//dont change tenant
 			Users[i].TenantID = existingUser.TenantID
+
 			if err := checkRolePermissions(&Users[i], loggedInUser); err != nil {
 				return err
 			}
