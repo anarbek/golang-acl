@@ -48,6 +48,8 @@ type AclBase struct {
 	acl *AclAbstract
 }
 
+type UsersGetFunc func(loggedInUser *models.User) []models.User
+
 func (aclBase *AclBase) Init() {
 	aclBase.acl = NewAclAbstract()
 }
@@ -59,38 +61,55 @@ func (aclBase *AclBase) UsersAll() []models.User {
 }
 
 func (aclBase *AclBase) Users(loggedInUser *models.User) []models.User {
-	return aclBase.acl.Users(loggedInUser)
+	fmt.Println("users requested!")
+	loggedInUserRole := GetRole(loggedInUser.RoleID)
+	switch loggedInUserRole.Name {
+	case models.RolesSuperadmin:
+		// Superadmin can see all users
+		return aclBase.acl.UsersAll()
+
+	case models.RolesTenant, models.RolesAdmin:
+		// Tenant and Admin can only see users with the same TenantID
+		return aclBase.acl.UsersByTenantID(loggedInUser.TenantID)
+
+	default:
+		// Other roles can only see themselves
+		return aclBase.acl.UsersByUserID(loggedInUser.ID)
+	}
 }
 
 func (aclBase *AclBase) InsertUser(user, loggedInUser *models.User) error {
+	// Check if the user already exists
+	for _, existingUser := range Users {
+		if existingUser.Name == user.Name {
+			return fmt.Errorf("user with Name %v already exists", user.Name)
+		}
+	}
 	user.TenantID = loggedInUser.TenantID
 	// Check the role permissions
 	if err := checkRolePermissions(user, loggedInUser); err != nil {
 		return err
-	}
-	//loggedInUserRole := GetRole(loggedInUser.RoleID)
-	switch loggedInUser.Role.Name {
-	case models.RolesSuperadmin:
-		// Superadmin can operate any user with any role
-	case models.RolesTenant:
-		// Tenant can only operate users with RoleNames: "Admin" and "User"
-		user.TenantID = loggedInUser.ID
-	case models.RolesAdmin:
-		// Admin can only operate users with RoleName: "User"
-		user.TenantID = loggedInUser.TenantID
-	default:
-		return fmt.Errorf("invalid role %v", loggedInUser.Role.Name)
 	}
 
 	return aclBase.acl.InsertUser(user, loggedInUser)
 }
 
 func (aclBase *AclBase) UpdateUser(user, loggedInUser *models.User) error {
+	// Check if the new name is already taken
+	for _, existingUser := range Users {
+		if existingUser.Name == user.Name && existingUser.ID != user.ID {
+			return LogErr("name %v is already taken", user.Name)
+		}
+	}
 	return aclBase.acl.UpdateUser(user, loggedInUser)
 }
 
 func (aclBase *AclBase) DeleteUser(id int, loggedInUser *models.User) error {
-	return aclBase.acl.DeleteUser(id, loggedInUser)
+	if loggedInUser.ID == id {
+		return LogErr("User has same ID, cannot be deleted")
+	}
+	fnGetUsers := aclBase.Users
+	return aclBase.acl.DeleteUser(id, loggedInUser, fnGetUsers)
 }
 
 type AclAbstract struct {
@@ -122,34 +141,23 @@ func (acl *AclAbstract) UsersAll() []models.User {
 	return Users
 }
 
-func (acl *AclAbstract) Users(loggedInUser *models.User) []models.User {
-	fmt.Println("users requested!")
-	loggedInUserRole := GetRole(loggedInUser.RoleID)
-	switch loggedInUserRole.Name {
-	case models.RolesSuperadmin:
-		// Superadmin can see all users
-		return Users
-
-	case models.RolesTenant, models.RolesAdmin:
-		// Tenant and Admin can only see users with the same TenantID
-		var filteredUsers []models.User
-		for _, user := range Users {
-			if user.TenantID == loggedInUser.TenantID {
-				filteredUsers = append(filteredUsers, user)
-			}
-		}
-		return filteredUsers
-
-	default:
-		// Other roles can only see themselves
-		for _, user := range Users {
-			if user.ID == loggedInUser.ID {
-				return []models.User{user}
-			}
+func (acl *AclAbstract) UsersByTenantID(TenantID int) []models.User {
+	fmt.Println("UsersByTenantID requested!")
+	var filteredUsers []models.User
+	for _, user := range Users {
+		if user.TenantID == TenantID {
+			filteredUsers = append(filteredUsers, user)
 		}
 	}
+	return filteredUsers
+}
 
-	// If no match, return an empty slice
+func (acl *AclAbstract) UsersByUserID(UserID int) []models.User {
+	for _, user := range Users {
+		if user.ID == UserID {
+			return []models.User{user}
+		}
+	}
 	return []models.User{}
 }
 
@@ -186,12 +194,6 @@ func checkRolePermissions(user, loggedInUser *models.User) error {
 }
 
 func (acl *AclAbstract) InsertUser(user, loggedInUser *models.User) error {
-	// Check if the user already exists
-	for _, existingUser := range Users {
-		if existingUser.Name == user.Name {
-			return fmt.Errorf("user with Name %v already exists", user.Name)
-		}
-	}
 
 	// Lock the mutex before accessing _userCounter
 	acl.mu.Lock()
@@ -213,12 +215,6 @@ func LogErr(format string, a ...any) error {
 }
 
 func (acl *AclAbstract) UpdateUser(user, loggedInUser *models.User) error {
-	// Check if the new name is already taken
-	for _, existingUser := range Users {
-		if existingUser.Name == user.Name && existingUser.ID != user.ID {
-			return LogErr("name %v is already taken", user.Name)
-		}
-	}
 
 	// Lock the mutex before accessing Users
 	acl.mu.Lock()
@@ -245,11 +241,9 @@ func (acl *AclAbstract) UpdateUser(user, loggedInUser *models.User) error {
 	return fmt.Errorf("user with ID %d not found", user.ID)
 }
 
-func (acl *AclAbstract) DeleteUser(id int, loggedInUser *models.User) error {
-	if loggedInUser.ID == id {
-		return LogErr("User has same ID, cannot be deleted")
-	}
-	allUsers := acl.Users(loggedInUser)
+func (acl *AclAbstract) DeleteUser(id int, loggedInUser *models.User, fnGetUsers UsersGetFunc) error {
+
+	allUsers := fnGetUsers(loggedInUser)
 	// Lock the mutex before accessing Users
 	acl.mu.Lock()
 	defer acl.mu.Unlock()
