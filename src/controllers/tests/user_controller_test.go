@@ -83,6 +83,30 @@ func SuperAdminMiddleware() gin.HandlerFunc {
 	}
 }
 
+func TenantMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// Here you would retrieve your user. This is just an example.
+		user := models.User{
+			ID:       205,
+			Name:     "Test Tenant",
+			TenantID: 205,
+			RoleID:   models.ConstTenantInt,
+			Role: models.Role{
+				ID:   models.ConstTenantInt,
+				Code: models.RolesTenant,
+				Name: models.RolesTenant,
+			},
+			// Fill out the rest of the user fields...
+		}
+
+		// Store the user in the context
+		c.Set("user", &user)
+
+		// Continue with the next handler in the chain
+		c.Next()
+	}
+}
+
 func TestInsertUserAsAdmin(t *testing.T) {
 	setup := Setup(AdminMiddleware())
 
@@ -129,6 +153,37 @@ func TestInsertUserAsSuperAdmin(t *testing.T) {
 		{"superadmin can create tenant role", `{"name": "Alice12", "email": "alice@example.com", "roleId": 4}`, http.StatusOK},
 		{"superadmin cannot create superadmin", `{"name": "Alice3", "email": "alice@example.com", "roleId": 3}`, http.StatusInternalServerError},
 		{"superadmin can create tenant", `{"name": "Alice4", "email": "alice@example.com", "roleId": 4}`, http.StatusOK},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			request, _ := http.NewRequest("POST", "/insert", strings.NewReader(tc.userJson))
+			response := httptest.NewRecorder()
+
+			setup.Router.ServeHTTP(response, request)
+
+			assert.Equal(t, tc.expectedCode, response.Code)
+		})
+	}
+}
+
+func TestInsertUserAsTenant(t *testing.T) {
+	setup := Setup(TenantMiddleware())
+
+	setup.Router.POST("/insert", setup.UserController.InsertUser)
+
+	testCases := []struct {
+		name         string
+		userJson     string
+		expectedCode int
+	}{
+		{"valid user", `{"name": "TuserS", "email": "alice@example.com", "roleId": 2}`, http.StatusOK},
+		{"same name", `{"name": "TuserS", "email": "alice@example.com", "roleId": 2}`, http.StatusInternalServerError},
+		{"tenant can create admin role", `{"name": "tuser2", "email": "alice@example.com", "roleId": 1}`, http.StatusOK},
+		{"same name error", `{"name": "tuser2", "email": "alice@example.com", "roleId": 4}`, http.StatusInternalServerError},
+		{"tenant cannot create tenant role", `{"name": "Alice12", "email": "alice@example.com", "roleId": 4}`, http.StatusInternalServerError},
+		{"tenant cannot create superadmin", `{"name": "Alice3", "email": "alice@example.com", "roleId": 3}`, http.StatusInternalServerError},
+		{"tenant can create tenant", `{"name": "Alice4", "email": "alice@example.com", "roleId": 4}`, http.StatusInternalServerError},
 	}
 
 	for _, tc := range testCases {

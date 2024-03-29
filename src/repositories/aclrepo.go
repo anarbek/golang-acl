@@ -39,6 +39,9 @@ var Users = []models.User{
 	{ID: 2, Name: "Jane Doe", Email: "jane@example.com", RoleID: models.ConstUserInt, TenantID: 1},
 	{ID: 3, Name: "Bob Doe", Email: "bob@example.com", RoleID: models.ConstAdminInt, TenantID: 3},
 	{ID: 4, Name: "Ken Doe", Email: "ken@example.com", RoleID: models.ConstUserInt, TenantID: 3},
+	{ID: 205, Name: "Tenant", Email: "tenant@example.com", RoleID: models.ConstTenantInt, TenantID: 205},
+	{ID: 206, Name: "User under tenant", Email: "tuser@example.com", RoleID: models.ConstUserInt, TenantID: 205},
+	{ID: 207, Name: "Admin under tenant", Email: "tadmin@example.com", RoleID: models.ConstAdminInt, TenantID: 205},
 }
 
 type AclBase struct {
@@ -189,6 +192,7 @@ func (acl *AclAbstract) InsertUser(user, loggedInUser *models.User) error {
 	defer acl.mu.Unlock() // Move the defer statement here
 
 	user.ID = acl._userCounter + 1
+	user.TenantID = loggedInUser.TenantID
 	acl._userCounter++
 
 	// Append the new user to the Users slice
