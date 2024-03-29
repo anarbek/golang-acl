@@ -161,25 +161,20 @@ func checkRolePermissions(user, loggedInUser *models.User) error {
 		if userToUpdateRole.Name == models.RolesSuperadmin {
 			return LogErr("superadmin cannot operate user with role %v", userToUpdateRole.Name)
 		}
-		return nil
-		// Superadmin can operate any user with any role
 	case models.RolesTenant:
-		// Tenant can only operate users with RoleNames: "Admin" and "User"
-		if userToUpdateRole.Name == models.RolesSuperadmin {
+		switch userToUpdateRole.Name {
+		case models.RolesSuperadmin:
 			return LogErr("Tenant cannot work with superadmin")
-		} else if userToUpdateRole.Name == models.RolesTenant {
+		case models.RolesTenant:
 			if user.ID != loggedInUser.ID {
 				return LogErr("Tenant can work only with its own user")
 			}
-			return nil
-		}
-		if userToUpdateRole.Name == models.RolesAdmin || userToUpdateRole.Name == models.RolesUser {
+		case models.RolesAdmin, models.RolesUser:
 			if user.TenantID != loggedInUser.TenantID {
 				return LogErr("tenant cannot operate user with role %v of other tenant", userToUpdateRole.Name)
 			}
 		}
 	case models.RolesAdmin:
-		// Admin can only operate users with RoleName: "User"
 		if userToUpdateRole.Name != models.RolesUser {
 			return LogErr("admin cannot operate user with role %v", userToUpdateRole.Name)
 		}
