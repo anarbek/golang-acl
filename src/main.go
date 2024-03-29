@@ -324,7 +324,7 @@ func privateACLCheckUser(c *gin.Context, pageName string, read, write bool) {
 func main() {
 	handler := &users.CustomLoginHandler{}
 	handlerExample := &users.InitialLoginHandler{}
-	acl := repositories.NewAclAbstract()
+	acl := &repositories.AclBase{}
 	handler.Init(acl)
 	number = rand.Intn(100) // Generate a random number between 0 and 99
 	router := gin.New()

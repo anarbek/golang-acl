@@ -24,6 +24,7 @@ type SignedResponse struct {
 
 // ILoginHandler defines the interface for user operations
 type ILoginHandler interface {
+	Init(_acl *repositories.AclBase)
 	SetRand(_num int)
 	//GetAll(c *gin.Context)
 	LoginUser(c *gin.Context)
@@ -32,10 +33,10 @@ type ILoginHandler interface {
 
 type CustomLoginHandler struct {
 	num int
-	acl *repositories.AclAbstract
+	acl *repositories.AclBase
 }
 
-func (h *CustomLoginHandler) Init(_acl *repositories.AclAbstract) {
+func (h *CustomLoginHandler) Init(_acl *repositories.AclBase) {
 	h.acl = _acl
 }
 

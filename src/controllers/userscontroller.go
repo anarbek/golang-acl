@@ -10,10 +10,10 @@ import (
 )
 
 type UserController struct {
-	acl *repositories.AclAbstract
+	acl *repositories.AclBase
 }
 
-func (u *UserController) Init(_acl *repositories.AclAbstract) {
+func (u *UserController) Init(_acl *repositories.AclBase) {
 	u.acl = _acl
 }
 

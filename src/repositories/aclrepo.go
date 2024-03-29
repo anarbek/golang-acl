@@ -7,10 +7,10 @@ import (
 )
 
 var Roles = []models.Role{
-	{ID: 1, Name: models.RolesAdmin, Code: models.RolesAdmin},
-	{ID: 2, Name: models.RolesUser, Code: models.RolesUser},
-	{ID: 3, Name: models.RolesSuperadmin, Code: models.RolesSuperadmin},
-	{ID: 4, Name: models.RolesTenant, Code: models.RolesTenant},
+	{ID: models.ConstAdminInt, Name: models.RolesAdmin, Code: models.RolesAdmin},
+	{ID: models.ConstUserInt, Name: models.RolesUser, Code: models.RolesUser},
+	{ID: models.ConstSuperAdminInt, Name: models.RolesSuperadmin, Code: models.RolesSuperadmin},
+	{ID: models.ConstTenantInt, Name: models.RolesTenant, Code: models.RolesTenant},
 }
 
 var Policies = []models.Policy{
@@ -32,11 +32,61 @@ var RolePolicies = []models.RolePolicy{
 }
 
 var Users = []models.User{
-	{ID: 5, Name: "Superadmin", Email: "superadmin@example.com", RoleID: 3, TenantID: 5},
-	{ID: 1, Name: "John Doe", Email: "john@example.com", RoleID: 1, TenantID: 1},
-	{ID: 2, Name: "Jane Doe", Email: "jane@example.com", RoleID: 2, TenantID: 1},
-	{ID: 3, Name: "Bob Doe", Email: "bob@example.com", RoleID: 1, TenantID: 3},
-	{ID: 4, Name: "Ken Doe", Email: "ken@example.com", RoleID: 2, TenantID: 3},
+	{ID: 105, Name: "Superadmin", Email: "superadmin@example.com", RoleID: models.ConstSuperAdminInt, TenantID: 105},
+	{ID: 106, Name: "User under superadmin", Email: "suser@example.com", RoleID: models.ConstUserInt, TenantID: 105},
+	{ID: 107, Name: "Admin under superadmin", Email: "sadmin@example.com", RoleID: models.ConstAdminInt, TenantID: 105},
+	{ID: 1, Name: "John Doe", Email: "john@example.com", RoleID: models.ConstAdminInt, TenantID: 1},
+	{ID: 2, Name: "Jane Doe", Email: "jane@example.com", RoleID: models.ConstUserInt, TenantID: 1},
+	{ID: 3, Name: "Bob Doe", Email: "bob@example.com", RoleID: models.ConstAdminInt, TenantID: 3},
+	{ID: 4, Name: "Ken Doe", Email: "ken@example.com", RoleID: models.ConstUserInt, TenantID: 3},
+}
+
+type AclBase struct {
+	acl *AclAbstract
+}
+
+func (aclBase *AclBase) Init() {
+	aclBase.acl = NewAclAbstract()
+}
+func (aclBase *AclBase) UsersWithRoles() []models.User {
+	return aclBase.acl.UsersWithRoles()
+}
+func (aclBase *AclBase) UsersAll() []models.User {
+	return aclBase.acl.UsersAll()
+}
+
+func (aclBase *AclBase) Users(loggedInUser *models.User) []models.User {
+	return aclBase.acl.Users(loggedInUser)
+}
+
+func (aclBase *AclBase) InsertUser(user, loggedInUser *models.User) error {
+	// Check the role permissions
+	if err := checkRolePermissions(user, loggedInUser); err != nil {
+		return err
+	}
+	//loggedInUserRole := GetRole(loggedInUser.RoleID)
+	switch loggedInUser.Role.Name {
+	case models.RolesSuperadmin:
+		// Superadmin can operate any user with any role
+	case models.RolesTenant:
+		// Tenant can only operate users with RoleNames: "Admin" and "User"
+		user.TenantID = loggedInUser.ID
+	case models.RolesAdmin:
+		// Admin can only operate users with RoleName: "User"
+		user.TenantID = loggedInUser.TenantID
+	default:
+		return fmt.Errorf("invalid role %v", loggedInUser.Role.Name)
+	}
+
+	return aclBase.acl.InsertUser(user, loggedInUser)
+}
+
+func (aclBase *AclBase) UpdateUser(user, loggedInUser *models.User) error {
+	return aclBase.acl.UpdateUser(user, loggedInUser)
+}
+
+func (aclBase *AclBase) DeleteUser(id int, loggedInUser *models.User) error {
+	return aclBase.acl.DeleteUser(id, loggedInUser)
 }
 
 type AclAbstract struct {
@@ -105,34 +155,28 @@ func checkRolePermissions(user, loggedInUser *models.User) error {
 	switch loggedInUser.Role.Name {
 	case models.RolesSuperadmin:
 		if userToUpdateRole.Name == models.RolesSuperadmin {
-			return fmt.Errorf("superadmin cannot operate user with role %v", userToUpdateRole.Name)
+			return LogErr("superadmin cannot operate user with role %v", userToUpdateRole.Name)
 		}
 		return nil
 		// Superadmin can operate any user with any role
 	case models.RolesTenant:
 		// Tenant can only operate users with RoleNames: "Admin" and "User"
 		if userToUpdateRole.Name != models.RolesAdmin && userToUpdateRole.Name != models.RolesUser {
-			return fmt.Errorf("tenant cannot operate user with role %v", userToUpdateRole.Name)
+			return LogErr("tenant cannot operate user with role %v", userToUpdateRole.Name)
 		}
 	case models.RolesAdmin:
 		// Admin can only operate users with RoleName: "User"
 		if userToUpdateRole.Name != models.RolesUser {
-			return fmt.Errorf("admin cannot operate user with role %v", userToUpdateRole.Name)
+			return LogErr("admin cannot operate user with role %v", userToUpdateRole.Name)
 		}
 	default:
-		return fmt.Errorf("invalid role %v", userToUpdateRole.Name)
+		return LogErr("invalid role %v", userToUpdateRole.Name)
 	}
-	if user.TenantID != loggedInUser.TenantID {
-		return fmt.Errorf("invalid tenant %v", user.TenantID)
-	}
+
 	return nil
 }
 
 func (acl *AclAbstract) InsertUser(user, loggedInUser *models.User) error {
-	// Check the role permissions
-	if err := checkRolePermissions(user, loggedInUser); err != nil {
-		return err
-	}
 	// Check if the user already exists
 	for _, existingUser := range Users {
 		if existingUser.Name == user.Name {
@@ -153,15 +197,16 @@ func (acl *AclAbstract) InsertUser(user, loggedInUser *models.User) error {
 	return nil
 }
 
+func LogErr(format string, a ...any) error {
+	fmt.Println(format, a)
+	return fmt.Errorf(format, a...)
+}
+
 func (acl *AclAbstract) UpdateUser(user, loggedInUser *models.User) error {
-	// Check the role permissions
-	if err := checkRolePermissions(user, loggedInUser); err != nil {
-		return err
-	}
 	// Check if the new name is already taken
 	for _, existingUser := range Users {
 		if existingUser.Name == user.Name && existingUser.ID != user.ID {
-			return fmt.Errorf("name %v is already taken", user.Name)
+			return LogErr("name %v is already taken", user.Name)
 		}
 	}
 
@@ -172,8 +217,17 @@ func (acl *AclAbstract) UpdateUser(user, loggedInUser *models.User) error {
 	// Find the user to update
 	for i, existingUser := range Users {
 		if existingUser.ID == user.ID {
+			if err := checkRolePermissions(&existingUser, loggedInUser); err != nil {
+				return err
+			}
 			// Update the user
 			Users[i] = *user
+
+			//dont change tenant
+			Users[i].TenantID = existingUser.TenantID
+			if err := checkRolePermissions(&Users[i], loggedInUser); err != nil {
+				return err
+			}
 			return nil
 		}
 	}
@@ -182,6 +236,9 @@ func (acl *AclAbstract) UpdateUser(user, loggedInUser *models.User) error {
 }
 
 func (acl *AclAbstract) DeleteUser(id int, loggedInUser *models.User) error {
+	if loggedInUser.ID == id {
+		return LogErr("User has same ID, cannot be deleted")
+	}
 	allUsers := acl.Users(loggedInUser)
 	// Lock the mutex before accessing Users
 	acl.mu.Lock()
@@ -196,7 +253,7 @@ func (acl *AclAbstract) DeleteUser(id int, loggedInUser *models.User) error {
 		}
 	}
 
-	return fmt.Errorf("user with ID %d not found", id)
+	return LogErr("user with ID %d not found", id)
 }
 
 func GetPolicyMap() map[int]models.Policy {
