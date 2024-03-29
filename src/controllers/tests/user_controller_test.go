@@ -182,8 +182,9 @@ func TestInsertUserAsTenant(t *testing.T) {
 		{"tenant can create admin role", `{"name": "tuser2", "email": "alice@example.com", "roleId": 1}`, http.StatusOK},
 		{"same name error", `{"name": "tuser2", "email": "alice@example.com", "roleId": 4}`, http.StatusInternalServerError},
 		{"tenant cannot create tenant role", `{"name": "Alice12", "email": "alice@example.com", "roleId": 4}`, http.StatusInternalServerError},
+
 		{"tenant cannot create superadmin", `{"name": "Alice3", "email": "alice@example.com", "roleId": 3}`, http.StatusInternalServerError},
-		{"tenant can create tenant", `{"name": "Alice4", "email": "alice@example.com", "roleId": 4}`, http.StatusInternalServerError},
+		{"tenant cannot create tenant", `{"name": "Alice4", "email": "alice@example.com", "roleId": 4}`, http.StatusInternalServerError},
 	}
 
 	for _, tc := range testCases {
@@ -258,6 +259,41 @@ func TestUpdateUserAsSuperAdmin(t *testing.T) {
 	}
 }
 
+func TestUpdateUserAsTenant(t *testing.T) {
+	setup := Setup(TenantMiddleware())
+
+	setup.Router.POST("/update", setup.UserController.UpdateUser)
+
+	testCases := []struct {
+		name         string
+		userJson     string
+		expectedCode int
+	}{
+		{"tenant cannot change role to superadmin", `{"id": 1, "name": "Bob", "email": "bob@example.com", "roleId": 3}`, http.StatusInternalServerError},
+		{"tenant can operate with self", `{"id": 205, "name": "tenant124", "email": "bob@example.com", "roleId": 4}`, http.StatusOK},
+		{"tenant can operate with self admin", `{"id": 206, "name": "User under tenant1", "email": "sadmin1@example.com", "roleId": 2}`, http.StatusOK},
+
+		{"tenant can not operate with other admin", `{"id": 3, "name": "User under tenant675", "email": "sadmin1@example.com", "roleId": 2}`, http.StatusInternalServerError},
+		{"valid", `{"id": 206, "name": "tuser1", "email": "suser1@example.com", "roleId": 2}`, http.StatusOK},
+		{"tenant can not operate with other tenants users", `{"id": 106, "name": "tuser2", "email": "suser1@example.com", "roleId": 2}`, http.StatusInternalServerError},
+		{"tenant can change user role to admin", `{"id": 206, "name": "tadmin2", "email": "jane1@example.com", "roleId": 1}`, http.StatusOK},
+		{"tenant cannot change user role to tenant", `{"id": 206, "name": "tadmin3", "email": "jane1@example.com", "roleId": 4}`, http.StatusInternalServerError},
+		{"might not take same name", `{"id": 1, "name": "Bob"}`, http.StatusInternalServerError},
+		{"name already taken", `{"id": 1, "name": "Jane Doe"}`, http.StatusInternalServerError},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			request, _ := http.NewRequest("POST", "/update", strings.NewReader(tc.userJson))
+			response := httptest.NewRecorder()
+
+			setup.Router.ServeHTTP(response, request)
+
+			assert.Equal(t, tc.expectedCode, response.Code)
+		})
+	}
+}
+
 func TestDeleteUserAsAdmin(t *testing.T) {
 	setup := Setup(AdminMiddleware())
 
@@ -281,7 +317,6 @@ func TestDeleteUserAsAdmin(t *testing.T) {
 			response := httptest.NewRecorder()
 
 			setup.Router.ServeHTTP(response, request)
-
 			assert.Equal(t, tc.expectedCode, response.Code)
 		})
 	}
@@ -301,6 +336,35 @@ func TestDeleteUserAsSuperAdmin(t *testing.T) {
 		{"invalid user", "abc", http.StatusBadRequest},
 		{"nonexistent user", "9999", http.StatusInternalServerError},
 		{"same id", "105", http.StatusInternalServerError},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			request, _ := http.NewRequest("DELETE", "/delete/"+tc.userId, nil)
+			response := httptest.NewRecorder()
+
+			setup.Router.ServeHTTP(response, request)
+
+			assert.Equal(t, tc.expectedCode, response.Code)
+		})
+	}
+}
+
+func TestDeleteUserAsTenant(t *testing.T) {
+	setup := Setup(TenantMiddleware())
+
+	setup.Router.DELETE("/delete/:id", setup.UserController.DeleteUser)
+
+	testCases := []struct {
+		name         string
+		userId       string
+		expectedCode int
+	}{
+		{"valid user", "207", http.StatusOK},
+		{"invalid user", "abc", http.StatusBadRequest},
+		{"nonexistent user", "9999", http.StatusInternalServerError},
+		{"same id", "205", http.StatusInternalServerError},
+		{"other tenant id", "3", http.StatusInternalServerError},
 	}
 
 	for _, tc := range testCases {
