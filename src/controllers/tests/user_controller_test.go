@@ -52,7 +52,7 @@ func AdminMiddleware() gin.HandlerFunc {
 		}
 
 		// Store the user in the context
-		c.Set("user", &user)
+		c.Set("user", user)
 
 		// Continue with the next handler in the chain
 		c.Next()
@@ -76,7 +76,7 @@ func SuperAdminMiddleware() gin.HandlerFunc {
 		}
 
 		// Store the user in the context
-		c.Set("user", &user)
+		c.Set("user", user)
 
 		// Continue with the next handler in the chain
 		c.Next()
@@ -100,7 +100,7 @@ func TenantMiddleware() gin.HandlerFunc {
 		}
 
 		// Store the user in the context
-		c.Set("user", &user)
+		c.Set("user", user)
 
 		// Continue with the next handler in the chain
 		c.Next()

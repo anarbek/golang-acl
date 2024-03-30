@@ -25,13 +25,13 @@ func (u *UserController) Init(_acl *repositories.AclBase) {
 // @Router /users [get]
 // @Security BearerAuth
 func (u *UserController) GetAll(c *gin.Context) {
-	/*loggedInUser, ok := GetLoggedInUser(c)
+	loggedInUser, ok := GetLoggedInUser(c)
 	if !ok {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to assert user"})
 		return
 	}
-	users := u.acl.Users(loggedInUser)*/
-	users := u.acl.UsersAll()
+	users := u.acl.Users(loggedInUser)
+	//users := u.acl.UsersAll()
 	/*for _, user := range users {
 		user.CurrNum = num
 	}*/
