@@ -17,8 +17,21 @@ func (u *UserController) Init(_acl *repositories.AclBase) {
 	u.acl = _acl
 }
 
+// @Summary Get all users
+// @Description get all users with their roles
+// @ID get-all-users
+// @Produce  json
+// @Success 200 {array} models.User
+// @Router /users [get]
+// @Security BearerAuth
 func (u *UserController) GetAll(c *gin.Context) {
-	users := u.acl.UsersWithRoles()
+	/*loggedInUser, ok := GetLoggedInUser(c)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to assert user"})
+		return
+	}
+	users := u.acl.Users(loggedInUser)*/
+	users := u.acl.UsersAll()
 	/*for _, user := range users {
 		user.CurrNum = num
 	}*/
@@ -33,16 +46,24 @@ func GetLoggedInUser(c *gin.Context) (value *models.User, ok bool) {
 		ok = false
 	}
 	// Perform a type assertion to convert loggedInUser to *models.User
-	loggedInUser, ok := loggedInUserInterface.(*models.User)
+	loggedInUser, ok := loggedInUserInterface.(models.User)
 	if !ok {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to assert user"})
 		ok = false
 	}
-	value = loggedInUser
+	value = &loggedInUser
 	return value, ok
 }
 
-// Insert a new user
+// @Summary Insert a new user
+// @Description insert a new user into the database
+// @ID insert-user
+// @Accept  json
+// @Produce  json
+// @Param user body models.User true "user to insert"
+// @Success 200 {object} models.User
+// @Router /users/insert [post]
+// @Security BearerAuth
 func (u *UserController) InsertUser(c *gin.Context) {
 	loggedInUser, ok := GetLoggedInUser(c)
 	if !ok {
@@ -65,7 +86,16 @@ func (u *UserController) InsertUser(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
-// Update an existing user
+// @Summary Update an existing user
+// @Description update an existing user in the database
+// @ID update-user
+// @Accept  json
+// @Produce  json
+// @Param id path int true "User ID"
+// @Param user body models.User true "user to update"
+// @Success 200 {object} models.User
+// @Router /users/update [post]
+// @Security BearerAuth
 func (u *UserController) UpdateUser(c *gin.Context) {
 	loggedInUser, ok := GetLoggedInUser(c)
 	if !ok {
@@ -88,7 +118,14 @@ func (u *UserController) UpdateUser(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
-// Delete a user
+// @Summary Delete a user
+// @Description delete a user from the database
+// @ID delete-user
+// @Produce  json
+// @Param id path int true "User ID"
+// @Success 200 "User deleted"
+// @Router /users/delete/{id} [delete]
+// @Security BearerAuth
 func (u *UserController) DeleteUser(c *gin.Context) {
 	loggedInUser, ok := GetLoggedInUser(c)
 	if !ok {

@@ -7,7 +7,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	swaggerFiles "github.com/swaggo/files"     // swaggerFiles
+	ginSwagger "github.com/swaggo/gin-swagger" // ginSwagger
+
 	"gokg/gomvc/controllers"
+	_ "gokg/gomvc/docs" // Import the docs
 	"gokg/gomvc/repositories"
 	"gokg/gomvc/users"
 	"math/rand"
@@ -321,6 +325,15 @@ func privateACLCheckUser(c *gin.Context, pageName string, read, write bool) {
 	c.Next()
 }*/
 
+// @title Swagger Example API
+// @version 1.0
+// @description This is a sample server for using Swagger with Gin.
+// @host localhost:8081
+// @BasePath /api/v1
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 func main() {
 	handler := &users.CustomLoginHandler{}
 	handlerExample := &users.InitialLoginHandler{}
@@ -361,6 +374,10 @@ func main() {
 			subjectRoutes.Use(handler.PrivateACLCheckUserWrapper("SubjectManagement", true, false)).GET("/", usersController.GetAll)
 		}
 	}
+
+	// Set up a route to serve the Swagger UI
+	url := ginSwagger.URL("http://localhost:8081/swagger/doc.json") // The url pointing to API definition
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
 
 	router.Run(":8081")
 }

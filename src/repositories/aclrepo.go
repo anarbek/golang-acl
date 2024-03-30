@@ -32,16 +32,16 @@ var RolePolicies = []models.RolePolicy{
 }
 
 var Users = []models.User{
-	{ID: 105, Name: "Superadmin", Email: "superadmin@example.com", RoleID: models.ConstSuperAdminInt, TenantID: 105},
-	{ID: 106, Name: "User under superadmin", Email: "suser@example.com", RoleID: models.ConstUserInt, TenantID: 105},
-	{ID: 107, Name: "Admin under superadmin", Email: "sadmin@example.com", RoleID: models.ConstAdminInt, TenantID: 105},
-	{ID: 1, Name: "John Doe", Email: "john@example.com", RoleID: models.ConstAdminInt, TenantID: 1},
-	{ID: 2, Name: "Jane Doe", Email: "jane@example.com", RoleID: models.ConstUserInt, TenantID: 1},
-	{ID: 3, Name: "Bob Doe", Email: "bob@example.com", RoleID: models.ConstAdminInt, TenantID: 3},
-	{ID: 4, Name: "Ken Doe", Email: "ken@example.com", RoleID: models.ConstUserInt, TenantID: 3},
-	{ID: 205, Name: "Tenant", Email: "tenant@example.com", RoleID: models.ConstTenantInt, TenantID: 205},
-	{ID: 206, Name: "User under tenant", Email: "tuser@example.com", RoleID: models.ConstUserInt, TenantID: 205},
-	{ID: 207, Name: "Admin under tenant", Email: "tadmin@example.com", RoleID: models.ConstAdminInt, TenantID: 205},
+	{ID: 105, Username: "Superadmin", Password: "super123", Email: "superadmin@example.com", RoleID: models.ConstSuperAdminInt, TenantID: 105},
+	{ID: 106, Username: "User under superadmin", Password: "usuper123", Email: "suser@example.com", RoleID: models.ConstUserInt, TenantID: 105},
+	{ID: 107, Username: "Admin under superadmin", Password: "ausuper123", Email: "sadmin@example.com", RoleID: models.ConstAdminInt, TenantID: 105},
+	{ID: 1, Username: "John Doe", Password: "john123", Email: "john@example.com", RoleID: models.ConstAdminInt, TenantID: 1},
+	{ID: 2, Username: "Jane Doe", Password: "jane123", Email: "jane@example.com", RoleID: models.ConstUserInt, TenantID: 1},
+	{ID: 3, Username: "Bob Doe", Password: "bob123", Email: "bob@example.com", RoleID: models.ConstAdminInt, TenantID: 3},
+	{ID: 4, Username: "Ken Doe", Password: "ken123", Email: "ken@example.com", RoleID: models.ConstUserInt, TenantID: 3},
+	{ID: 205, Username: "Tenant", Password: "tenant123", Email: "tenant@example.com", RoleID: models.ConstTenantInt, TenantID: 205},
+	{ID: 206, Username: "User under tenant", Password: "ut123", Email: "tuser@example.com", RoleID: models.ConstUserInt, TenantID: 205},
+	{ID: 207, Username: "Admin under tenant", Password: "at123", Email: "tadmin@example.com", RoleID: models.ConstAdminInt, TenantID: 205},
 }
 
 type AclBase struct {
@@ -58,6 +58,10 @@ func (aclBase *AclBase) UsersWithRoles() []models.User {
 }
 func (aclBase *AclBase) UsersAll() []models.User {
 	return aclBase.acl.UsersAll()
+}
+
+func (aclBase *AclBase) GetUserByUsernamePassword(loginParams models.LoginUser) models.User {
+	return aclBase.acl.GetUserByUsernamePassword(loginParams)
 }
 
 func (aclBase *AclBase) Users(loggedInUser *models.User) []models.User {
@@ -81,8 +85,8 @@ func (aclBase *AclBase) Users(loggedInUser *models.User) []models.User {
 func (aclBase *AclBase) InsertUser(user, loggedInUser *models.User) error {
 	// Check if the user already exists
 	for _, existingUser := range Users {
-		if existingUser.Name == user.Name {
-			return fmt.Errorf("user with Name %v already exists", user.Name)
+		if existingUser.Username == user.Username {
+			return fmt.Errorf("user with Name %v already exists", user.Username)
 		}
 	}
 	user.TenantID = loggedInUser.TenantID
@@ -97,8 +101,8 @@ func (aclBase *AclBase) InsertUser(user, loggedInUser *models.User) error {
 func (aclBase *AclBase) UpdateUser(user, loggedInUser *models.User) error {
 	// Check if the new name is already taken
 	for _, existingUser := range Users {
-		if existingUser.Name == user.Name && existingUser.ID != user.ID {
-			return LogErr("name %v is already taken", user.Name)
+		if existingUser.Username == user.Username && existingUser.ID != user.ID {
+			return LogErr("name %v is already taken", user.Username)
 		}
 	}
 	return aclBase.acl.UpdateUser(user, loggedInUser)
@@ -159,6 +163,17 @@ func (acl *AclAbstract) UsersByUserID(UserID int) []models.User {
 		}
 	}
 	return []models.User{}
+}
+
+func (acl *AclAbstract) GetUserByUsernamePassword(loginParams models.LoginUser) models.User {
+	var user models.User
+	for _, u := range acl.UsersWithRoles() {
+		if u.Username == loginParams.Username && u.Password == loginParams.Password {
+			user = u
+			break
+		}
+	}
+	return user
 }
 
 func checkRolePermissions(user, loggedInUser *models.User) error {

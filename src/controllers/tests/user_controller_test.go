@@ -40,7 +40,7 @@ func AdminMiddleware() gin.HandlerFunc {
 		// Here you would retrieve your user. This is just an example.
 		user := models.User{
 			ID:       1,
-			Name:     "Test User",
+			Username: "Test User",
 			TenantID: 1,
 			RoleID:   models.ConstAdminInt,
 			Role: models.Role{
@@ -64,7 +64,7 @@ func SuperAdminMiddleware() gin.HandlerFunc {
 		// Here you would retrieve your user. This is just an example.
 		user := models.User{
 			ID:       105,
-			Name:     "Test SuperAdmin",
+			Username: "Test SuperAdmin",
 			TenantID: 105,
 			RoleID:   models.ConstSuperAdminInt,
 			Role: models.Role{
@@ -88,7 +88,7 @@ func TenantMiddleware() gin.HandlerFunc {
 		// Here you would retrieve your user. This is just an example.
 		user := models.User{
 			ID:       205,
-			Name:     "Test Tenant",
+			Username: "Test Tenant",
 			TenantID: 205,
 			RoleID:   models.ConstTenantInt,
 			Role: models.Role{
@@ -117,16 +117,20 @@ func TestInsertUserAsAdmin(t *testing.T) {
 		userJson     string
 		expectedCode int
 	}{
-		{"valid user", `{"name": "Alice", "email": "alice@example.com", "roleId": 2}`, http.StatusOK},
-		{"same name", `{"name": "Alice", "email": "alice@example.com", "roleId": 2}`, http.StatusInternalServerError},
-		{"admin cannot create admin role", `{"name": "Alice2", "email": "alice@example.com", "roleId": 1}`, http.StatusInternalServerError},
-		{"admin cannot create superadmin", `{"name": "Alice3", "email": "alice@example.com", "roleId": 3}`, http.StatusInternalServerError},
-		{"admin cannot create tenant", `{"name": "Alice4", "email": "alice@example.com", "roleId": 4}`, http.StatusInternalServerError},
+		{"valid user", `{"username": "Alice", "email": "alice@example.com", "roleId": 2}`, http.StatusOK},
+
+		{"same name", `{"username": "Alice", "email": "alice@example.com", "roleId": 2}`, http.StatusInternalServerError},
+		{"admin cannot create admin role", `{"username": "Alice2", "email": "alice@example.com", "roleId": 1}`, http.StatusInternalServerError},
+		{"admin cannot create superadmin", `{"username": "Alice3", "email": "alice@example.com", "roleId": 3}`, http.StatusInternalServerError},
+		{"admin cannot create tenant", `{"username": "Alice4", "email": "alice@example.com", "roleId": 4}`, http.StatusInternalServerError},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			request, _ := http.NewRequest("POST", "/insert", strings.NewReader(tc.userJson))
+			// Add the Authorization header to the request
+			bearerToken := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MTE4MTE1NjEsIm5iZiI6MTcxMTgwNzk2MSwidXNlciI6IlN1cGVyYWRtaW4iLCJ1c2VySWQiOjEwNX0.pZDJhRWMUY7OMmk6ndpNgc-DnWeY2t9Ed1J7yAWDFnE"
+			request.Header.Add("Authorization", "Bearer "+bearerToken)
 			response := httptest.NewRecorder()
 
 			setup.Router.ServeHTTP(response, request)
@@ -146,13 +150,13 @@ func TestInsertUserAsSuperAdmin(t *testing.T) {
 		userJson     string
 		expectedCode int
 	}{
-		{"valid user", `{"name": "AliceS", "email": "alice@example.com", "roleId": 2}`, http.StatusOK},
-		{"same name", `{"name": "AliceS", "email": "alice@example.com", "roleId": 2}`, http.StatusInternalServerError},
-		{"superadmin can create admin role", `{"name": "Alice2", "email": "alice@example.com", "roleId": 1}`, http.StatusOK},
-		{"same name error should be", `{"name": "Alice2", "email": "alice@example.com", "roleId": 4}`, http.StatusInternalServerError},
-		{"superadmin can create tenant role", `{"name": "Alice12", "email": "alice@example.com", "roleId": 4}`, http.StatusOK},
-		{"superadmin cannot create superadmin", `{"name": "Alice3", "email": "alice@example.com", "roleId": 3}`, http.StatusInternalServerError},
-		{"superadmin can create tenant", `{"name": "Alice4", "email": "alice@example.com", "roleId": 4}`, http.StatusOK},
+		{"valid user", `{"username": "AliceS", "email": "alice@example.com", "roleId": 2}`, http.StatusOK},
+		{"same name", `{"username": "AliceS", "email": "alice@example.com", "roleId": 2}`, http.StatusInternalServerError},
+		{"superadmin can create admin role", `{"username": "Alice2", "email": "alice@example.com", "roleId": 1}`, http.StatusOK},
+		{"same name error should be", `{"username": "Alice2", "email": "alice@example.com", "roleId": 4}`, http.StatusInternalServerError},
+		{"superadmin can create tenant role", `{"username": "Alice12", "email": "alice@example.com", "roleId": 4}`, http.StatusOK},
+		{"superadmin cannot create superadmin", `{"username": "Alice3", "email": "alice@example.com", "roleId": 3}`, http.StatusInternalServerError},
+		{"superadmin can create tenant", `{"username": "Alice4", "email": "alice@example.com", "roleId": 4}`, http.StatusOK},
 	}
 
 	for _, tc := range testCases {
@@ -177,14 +181,14 @@ func TestInsertUserAsTenant(t *testing.T) {
 		userJson     string
 		expectedCode int
 	}{
-		{"valid user", `{"name": "TuserS", "email": "alice@example.com", "roleId": 2}`, http.StatusOK},
-		{"same name", `{"name": "TuserS", "email": "alice@example.com", "roleId": 2}`, http.StatusInternalServerError},
-		{"tenant can create admin role", `{"name": "tuser2", "email": "alice@example.com", "roleId": 1}`, http.StatusOK},
-		{"same name error", `{"name": "tuser2", "email": "alice@example.com", "roleId": 4}`, http.StatusInternalServerError},
-		{"tenant cannot create tenant role", `{"name": "Alice12", "email": "alice@example.com", "roleId": 4}`, http.StatusInternalServerError},
+		{"valid user", `{"username": "TuserS", "email": "alice@example.com", "roleId": 2}`, http.StatusOK},
+		{"same name", `{"username": "TuserS", "email": "alice@example.com", "roleId": 2}`, http.StatusInternalServerError},
+		{"tenant can create admin role", `{"username": "tuser2", "email": "alice@example.com", "roleId": 1}`, http.StatusOK},
+		{"same name error", `{"username": "tuser2", "email": "alice@example.com", "roleId": 4}`, http.StatusInternalServerError},
+		{"tenant cannot create tenant role", `{"username": "Alice12", "email": "alice@example.com", "roleId": 4}`, http.StatusInternalServerError},
 
-		{"tenant cannot create superadmin", `{"name": "Alice3", "email": "alice@example.com", "roleId": 3}`, http.StatusInternalServerError},
-		{"tenant cannot create tenant", `{"name": "Alice4", "email": "alice@example.com", "roleId": 4}`, http.StatusInternalServerError},
+		{"tenant cannot create superadmin", `{"username": "Alice3", "email": "alice@example.com", "roleId": 3}`, http.StatusInternalServerError},
+		{"tenant cannot create tenant", `{"username": "Alice4", "email": "alice@example.com", "roleId": 4}`, http.StatusInternalServerError},
 	}
 
 	for _, tc := range testCases {
@@ -209,11 +213,11 @@ func TestUpdateUserAsAdmin(t *testing.T) {
 		userJson     string
 		expectedCode int
 	}{
-		{"admin cannot operate with admin", `{"id": 1, "name": "Bob", "email": "bob@example.com", "roleId": 2}`, http.StatusInternalServerError},
-		{"valid", `{"id": 2, "name": "Jane1", "email": "jane1@example.com", "roleId": 2}`, http.StatusOK},
-		{"admin cannot change user role to admin", `{"id": 2, "name": "Jane1", "email": "jane1@example.com", "roleId": 1}`, http.StatusInternalServerError},
-		{"might not take same name", `{"id": 2, "name": "Bob"}`, http.StatusInternalServerError},
-		{"name already taken", `{"id": 1, "name": "Jane Doe"}`, http.StatusInternalServerError},
+		{"admin cannot operate with admin", `{"id": 1, "username": "Bob", "email": "bob@example.com", "roleId": 2}`, http.StatusInternalServerError},
+		{"valid", `{"id": 2, "username": "Jane1", "email": "jane1@example.com", "roleId": 2}`, http.StatusOK},
+		{"admin cannot change user role to admin", `{"id": 2, "username": "Jane1", "email": "jane1@example.com", "roleId": 1}`, http.StatusInternalServerError},
+		{"might not take same name", `{"id": 2, "username": "Bob"}`, http.StatusInternalServerError},
+		{"name already taken", `{"id": 1, "username": "Jane Doe"}`, http.StatusInternalServerError},
 	}
 
 	for _, tc := range testCases {
@@ -238,13 +242,13 @@ func TestUpdateUserAsSuperAdmin(t *testing.T) {
 		userJson     string
 		expectedCode int
 	}{
-		{"superadmin cannot operate with superadmin", `{"id": 1, "name": "Bob", "email": "bob@example.com", "roleId": 3}`, http.StatusInternalServerError},
-		{"superadmin can operate with admin", `{"id": 3, "name": "Bob1", "email": "sadmin1@example.com", "roleId": 2}`, http.StatusOK},
-		{"valid", `{"id": 106, "name": "suser", "email": "suser1@example.com", "roleId": 2}`, http.StatusOK},
-		{"superadmin can change user role to admin", `{"id": 106, "name": "sadmin2", "email": "jane1@example.com", "roleId": 1}`, http.StatusOK},
-		{"superadmin cannot change user role to superadmin", `{"id": 106, "name": "sadmin3", "email": "jane1@example.com", "roleId": 3}`, http.StatusInternalServerError},
-		{"might not take same name", `{"id": 1, "name": "Bob"}`, http.StatusInternalServerError},
-		{"name already taken", `{"id": 1, "name": "Jane Doe"}`, http.StatusInternalServerError},
+		{"superadmin cannot operate with superadmin", `{"id": 1, "username": "Bob", "email": "bob@example.com", "roleId": 3}`, http.StatusInternalServerError},
+		{"superadmin can operate with admin", `{"id": 3, "username": "Bob1", "email": "sadmin1@example.com", "roleId": 2}`, http.StatusOK},
+		{"valid", `{"id": 106, "username": "suser", "email": "suser1@example.com", "roleId": 2}`, http.StatusOK},
+		{"superadmin can change user role to admin", `{"id": 106, "username": "sadmin2", "email": "jane1@example.com", "roleId": 1}`, http.StatusOK},
+		{"superadmin cannot change user role to superadmin", `{"id": 106, "username": "sadmin3", "email": "jane1@example.com", "roleId": 3}`, http.StatusInternalServerError},
+		{"might not take same name", `{"id": 1, "username": "Bob"}`, http.StatusInternalServerError},
+		{"name already taken", `{"id": 1, "username": "Jane Doe"}`, http.StatusInternalServerError},
 	}
 
 	for _, tc := range testCases {
@@ -269,17 +273,17 @@ func TestUpdateUserAsTenant(t *testing.T) {
 		userJson     string
 		expectedCode int
 	}{
-		{"tenant cannot change role to superadmin", `{"id": 1, "name": "Bob", "email": "bob@example.com", "roleId": 3}`, http.StatusInternalServerError},
-		{"tenant can operate with self", `{"id": 205, "name": "tenant124", "email": "bob@example.com", "roleId": 4}`, http.StatusOK},
-		{"tenant can operate with self admin", `{"id": 206, "name": "User under tenant1", "email": "sadmin1@example.com", "roleId": 2}`, http.StatusOK},
+		{"tenant cannot change role to superadmin", `{"id": 1, "username": "Bob", "email": "bob@example.com", "roleId": 3}`, http.StatusInternalServerError},
+		{"tenant can operate with self", `{"id": 205, "username": "tenant124", "email": "bob@example.com", "roleId": 4}`, http.StatusOK},
+		{"tenant can operate with self admin", `{"id": 206, "username": "User under tenant1", "email": "sadmin1@example.com", "roleId": 2}`, http.StatusOK},
 
-		{"tenant can not operate with other admin", `{"id": 3, "name": "User under tenant675", "email": "sadmin1@example.com", "roleId": 2}`, http.StatusInternalServerError},
-		{"valid", `{"id": 206, "name": "tuser1", "email": "suser1@example.com", "roleId": 2}`, http.StatusOK},
-		{"tenant can not operate with other tenants users", `{"id": 106, "name": "tuser2", "email": "suser1@example.com", "roleId": 2}`, http.StatusInternalServerError},
-		{"tenant can change user role to admin", `{"id": 206, "name": "tadmin2", "email": "jane1@example.com", "roleId": 1}`, http.StatusOK},
-		{"tenant cannot change user role to tenant", `{"id": 206, "name": "tadmin3", "email": "jane1@example.com", "roleId": 4}`, http.StatusInternalServerError},
-		{"might not take same name", `{"id": 1, "name": "Bob"}`, http.StatusInternalServerError},
-		{"name already taken", `{"id": 1, "name": "Jane Doe"}`, http.StatusInternalServerError},
+		{"tenant can not operate with other admin", `{"id": 3, "username": "User under tenant675", "email": "sadmin1@example.com", "roleId": 2}`, http.StatusInternalServerError},
+		{"valid", `{"id": 206, "username": "tuser1", "email": "suser1@example.com", "roleId": 2}`, http.StatusOK},
+		{"tenant can not operate with other tenants users", `{"id": 106, "username": "tuser2", "email": "suser1@example.com", "roleId": 2}`, http.StatusInternalServerError},
+		{"tenant can change user role to admin", `{"id": 206, "username": "tadmin2", "email": "jane1@example.com", "roleId": 1}`, http.StatusOK},
+		{"tenant cannot change user role to tenant", `{"id": 206, "username": "tadmin3", "email": "jane1@example.com", "roleId": 4}`, http.StatusInternalServerError},
+		{"might not take same name", `{"id": 1, "username": "Bob"}`, http.StatusInternalServerError},
+		{"name already taken", `{"id": 1, "username": "Jane Doe"}`, http.StatusInternalServerError},
 	}
 
 	for _, tc := range testCases {

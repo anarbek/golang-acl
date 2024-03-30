@@ -54,28 +54,30 @@ func (h *CustomLoginHandler) SetRand(_num int) {
 }*/
 
 func (h *CustomLoginHandler) LoginUser(c *gin.Context) {
-	type loginUser struct {
+	/*type loginUser struct {
 		Username string `json:"username,omitempty"`
-	}
+	}*/
 
-	loginParams := loginUser{}
+	loginParams := models.LoginUser{}
 	c.ShouldBindJSON(&loginParams)
 
-	users := h.acl.UsersWithRoles()
+	/*users := h.acl.UsersWithRoles()
 	// Search for the user in the Users array
 	var user models.User
 	for _, u := range users {
-		if u.Name == loginParams.Username {
+		if u.Username == loginParams.Username {
 			user = u
 			break
 		}
-	}
+	}*/
+
+	user := h.acl.GetUserByUsernamePassword(loginParams)
 
 	// If the user was found, generate a JWT and include the user's RoleID in the claims
 	if user.ID != 0 {
 		expirationTime := time.Now().Add(1 * time.Hour) // Token expires after 1 hours
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-			"user":   user.Name,
+			"user":   user.Username,
 			"userId": user.ID,
 			"nbf":    time.Now().Unix(),     // Set 'nbf' to now
 			"exp":    expirationTime.Unix(), // Add the 'exp' claim

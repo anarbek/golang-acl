@@ -1,0 +1,156 @@
+basePath: /api/v1
+definitions:
+  models.Policy:
+    properties:
+      code:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  models.Role:
+    properties:
+      code:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      rolePolicies:
+        items:
+          $ref: '#/definitions/models.RolePolicy'
+        type: array
+    type: object
+  models.RolePolicy:
+    properties:
+      policy:
+        $ref: '#/definitions/models.Policy'
+      policyId:
+        type: integer
+      read:
+        type: boolean
+      role:
+        $ref: '#/definitions/models.Role'
+      roleId:
+        type: integer
+      write:
+        type: boolean
+    type: object
+  models.User:
+    properties:
+      email:
+        type: string
+      id:
+        type: integer
+      role:
+        $ref: '#/definitions/models.Role'
+      roleId:
+        type: integer
+      tenantId:
+        type: integer
+      username:
+        type: string
+    type: object
+host: localhost:8081
+info:
+  contact: {}
+  description: This is a sample server for using Swagger with Gin.
+  title: Swagger Example API
+  version: "1.0"
+paths:
+  /users:
+    get:
+      description: get all users with their roles
+      operationId: get-all-users
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.User'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get all users
+  /users/delete/{id}:
+    delete:
+      description: delete a user from the database
+      operationId: delete-user
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User deleted
+      security:
+      - BearerAuth: []
+      summary: Delete a user
+  /users/insert:
+    post:
+      consumes:
+      - application/json
+      description: insert a new user into the database
+      operationId: insert-user
+      parameters:
+      - description: user to insert
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+      security:
+      - BearerAuth: []
+      summary: Insert a new user
+  /users/update:
+    post:
+      consumes:
+      - application/json
+      description: update an existing user in the database
+      operationId: update-user
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: user to update
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+      security:
+      - BearerAuth: []
+      summary: Update an existing user
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
