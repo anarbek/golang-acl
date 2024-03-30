@@ -17,13 +17,6 @@ func (u *UserController) Init(_acl *repositories.AclBase) {
 	u.acl = _acl
 }
 
-// @Summary Get all users
-// @Description get all users with their roles
-// @ID get-all-users
-// @Produce  json
-// @Success 200 {array} models.User
-// @Router /users [get]
-// @Security BearerAuth
 func (u *UserController) GetAll(c *gin.Context) {
 	/*loggedInUser, ok := GetLoggedInUser(c)
 	if !ok {
@@ -55,15 +48,6 @@ func GetLoggedInUser(c *gin.Context) (value *models.User, ok bool) {
 	return value, ok
 }
 
-// @Summary Insert a new user
-// @Description insert a new user into the database
-// @ID insert-user
-// @Accept  json
-// @Produce  json
-// @Param user body models.User true "user to insert"
-// @Success 200 {object} models.User
-// @Router /users/insert [post]
-// @Security BearerAuth
 func (u *UserController) InsertUser(c *gin.Context) {
 	loggedInUser, ok := GetLoggedInUser(c)
 	if !ok {
@@ -86,16 +70,6 @@ func (u *UserController) InsertUser(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
-// @Summary Update an existing user
-// @Description update an existing user in the database
-// @ID update-user
-// @Accept  json
-// @Produce  json
-// @Param id path int true "User ID"
-// @Param user body models.User true "user to update"
-// @Success 200 {object} models.User
-// @Router /users/update [post]
-// @Security BearerAuth
 func (u *UserController) UpdateUser(c *gin.Context) {
 	loggedInUser, ok := GetLoggedInUser(c)
 	if !ok {
@@ -118,14 +92,6 @@ func (u *UserController) UpdateUser(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
-// @Summary Delete a user
-// @Description delete a user from the database
-// @ID delete-user
-// @Produce  json
-// @Param id path int true "User ID"
-// @Success 200 "User deleted"
-// @Router /users/delete/{id} [delete]
-// @Security BearerAuth
 func (u *UserController) DeleteUser(c *gin.Context) {
 	loggedInUser, ok := GetLoggedInUser(c)
 	if !ok {
@@ -148,23 +114,3 @@ func (u *UserController) DeleteUser(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"status": "User deleted"})
 }
-
-/*var num = 0
-
-func SetRand(_num int) {
-	num = _num
-}
-
-func GetAll(c *gin.Context) {
-	users := repositories.UsersWithRoles()
-	for _, user := range users {
-		user.CurrNum = num
-	}
-	// implement your logic here
-	c.JSON(200, users)
-}
-
-func loginUser(c *gin.Context) {
-
-}
-*/
