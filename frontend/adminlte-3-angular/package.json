@@ -41,6 +41,7 @@
         "@profabric/angular-components": "0.2.4",
         "bootstrap": "5.3.2",
         "core-js": "3.36.0",
+        "jsonwebtoken": "^9.0.2",
         "lit": "3.1.2",
         "luxon": "3.4.4",
         "ngx-google-analytics": "14.0.1",

@@ -2,6 +2,7 @@ import {Injectable} from '@angular/core';
 import {Router} from '@angular/router';
 import {ToastrService} from 'ngx-toastr';
 import { sleep } from '@/utils/helpers';
+import { AuthService } from './auth.service';
 
 @Injectable({
     providedIn: 'root'
@@ -9,7 +10,7 @@ import { sleep } from '@/utils/helpers';
 export class AppService {
     public user: any = null;
 
-    constructor(private router: Router, private toastr: ToastrService) {}
+    constructor(private auth: AuthService, private router: Router, private toastr: ToastrService) {}
 
     async loginByAuth({email, password}) {
         try {
