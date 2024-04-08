@@ -3,6 +3,8 @@ import {Router} from '@angular/router';
 import {ToastrService} from 'ngx-toastr';
 import { sleep } from '@/utils/helpers';
 import { AuthService } from './auth.service';
+import { HttpClient } from '@angular/common/http';
+import { LoginService } from './login.service';
 
 @Injectable({
     providedIn: 'root'
@@ -10,23 +12,32 @@ import { AuthService } from './auth.service';
 export class AppService {
     public user: any = null;
 
-    constructor(private auth: AuthService, private router: Router, private toastr: ToastrService) {}
+    constructor(private auth: AuthService, private router: Router, private toastr: ToastrService,
+      private httpClient: HttpClient, private loginService: LoginService
+      ) {}
 
-    async loginByAuth({email, password}) {
+      async loginByAuth({email, password}) {
         try {
           console.log('email',email)
-            await authLogin(email, password);
-            await this.getProfile();
-            this.router.navigate(['/']);
-            this.toastr.success('Login success');
+          this.loginService.getUser(email, password).subscribe({
+            next: (res) => {
+              this.getProfile();
+              this.router.navigate(['/']);
+              this.toastr.success('Login success');
+            },
+            error: (err) => {
+              this.toastr.error(err.message);
+            }
+          });
         } catch (error) {
-            this.toastr.error(error.message);
+          this.toastr.error(error.message);
         }
-    }
+      }
 
     async registerByAuth({email, password}) {
         try {
-          await authLogin(email, password);
+          await this.loginService.getUser(email, password);
+          //await authLogin(email, password);
           await this.getProfile();
           this.router.navigate(['/']);
           this.toastr.success('Register success');
@@ -73,7 +84,8 @@ export class AppService {
 
     async getProfile() {
         try {
-            const user = await getAuthStatus();
+            //const user = await getAuthStatus();
+            let user = this.auth.getUser()
             if(user) {
               this.user = user;
             } else {
@@ -94,6 +106,7 @@ export class AppService {
 }
 
 
+/*
 export const authLogin = (email: string, password: string) => {
   return new Promise(async (res, rej) => {
     await sleep(500);
@@ -106,9 +119,9 @@ export const authLogin = (email: string, password: string) => {
     }
     return rej({ message: 'Credentials are wrong!' });
   });
-};
+};*/
 
-export const getAuthStatus = () => {
+/*export const getAuthStatus = () => {
   return new Promise(async (res, rej) => {
     await sleep(500);
     try {
@@ -122,4 +135,4 @@ export const getAuthStatus = () => {
       return res(undefined);
     }
   });
-};
+};*/

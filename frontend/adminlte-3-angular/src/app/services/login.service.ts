@@ -13,11 +13,9 @@ export class LoginService {
   constructor(private http: HttpClient, private authService: AuthService) { }
 
   getUser(username: string, password: string): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}`, {
-      params: {
-        username: username,
-        password: password
-      }
+    return this.http.post<any>(`${this.apiUrl}`, {
+      username: username,
+      password: password
     }).pipe(
       map(data => {
         // The server should return a bearer token on successful login

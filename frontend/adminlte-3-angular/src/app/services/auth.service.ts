@@ -31,7 +31,24 @@ export class AuthService {
     return jwt_decode(token);
   }
 }
+
 function jwt_decode(token: string): any {
-  throw new Error('Function not implemented.');
+  try {
+    // Split the JWT into header, payload, and signature
+    const parts = token.split('.');
+    if (parts.length !== 3) {
+      throw new Error('The token is not a valid JWT');
+    }
+
+    // Decode the payload
+    const decoded = atob(parts[1]);
+
+    // Parse the JSON payload
+    const payload = JSON.parse(decoded);
+
+    return payload;
+  } catch (error) {
+    throw new Error('Error decoding the token: ' + error.message);
+  }
 }
 

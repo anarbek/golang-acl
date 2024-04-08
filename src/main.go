@@ -15,6 +15,8 @@ import (
 	"gokg/gomvc/repositories"
 	"gokg/gomvc/users"
 	"math/rand"
+
+	"github.com/gin-contrib/cors"
 )
 
 var privateThings = map[string]map[int64]string{
@@ -341,6 +343,9 @@ func main() {
 	handler.Init(acl)
 	number = rand.Intn(100) // Generate a random number between 0 and 99
 	router := gin.New()
+	config := cors.DefaultConfig()
+	config.AllowAllOrigins = true
+	router.Use(cors.New(config))
 	router.GET("/", index)
 	router.GET("/rnd", func(c *gin.Context) {
 		c.String(http.StatusOK, "(2)Random number: %d", number)
