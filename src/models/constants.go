@@ -14,3 +14,9 @@ const (
 	ConstSuperAdminInt = 3
 	ConstTenantInt     = 4
 )
+
+const (
+	ConstRoleTypeSuperAdminInt = 1
+	ConstRoleTypeTenantInt     = 2
+	ConstRoleTypeOtherInt      = 3
+)

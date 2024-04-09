@@ -7,10 +7,10 @@ import (
 )
 
 var Roles = []models.Role{
-	{ID: models.ConstAdminInt, Name: models.RolesAdmin, Code: models.RolesAdmin},
-	{ID: models.ConstUserInt, Name: models.RolesUser, Code: models.RolesUser},
-	{ID: models.ConstSuperAdminInt, Name: models.RolesSuperadmin, Code: models.RolesSuperadmin},
-	{ID: models.ConstTenantInt, Name: models.RolesTenant, Code: models.RolesTenant},
+	{ID: models.ConstAdminInt, Name: models.RolesAdmin, Code: models.RolesAdmin, RoleTypeId: models.ConstRoleTypeOtherInt, TenantID: 105},
+	{ID: models.ConstUserInt, Name: models.RolesUser, Code: models.RolesUser, RoleTypeId: models.ConstRoleTypeOtherInt, TenantID: 105},
+	{ID: models.ConstSuperAdminInt, Name: models.RolesSuperadmin, Code: models.RolesSuperadmin, RoleTypeId: models.ConstRoleTypeSuperAdminInt, TenantID: 105},
+	{ID: models.ConstTenantInt, Name: models.RolesTenant, Code: models.RolesTenant, RoleTypeId: models.ConstRoleTypeTenantInt, TenantID: 205},
 }
 
 var Policies = []models.Policy{

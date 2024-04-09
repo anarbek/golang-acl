@@ -340,6 +340,7 @@ func main() {
 	handler := &users.CustomLoginHandler{}
 	handlerExample := &users.InitialLoginHandler{}
 	acl := &repositories.AclBase{}
+	roleBase := &repositories.RoleBase{}
 	handler.Init(acl)
 	number = rand.Intn(100) // Generate a random number between 0 and 99
 	router := gin.New()
@@ -372,6 +373,15 @@ func main() {
 			usersRoutes.Use(handler.PrivateACLCheckUserWrapper("UserManagement", true, true)).POST("insert", usersController.InsertUser)
 			usersRoutes.Use(handler.PrivateACLCheckUserWrapper("UserManagement", true, true)).POST("update", usersController.UpdateUser)
 			usersRoutes.Use(handler.PrivateACLCheckUserWrapper("UserManagement", true, true)).DELETE("delete/:id", usersController.DeleteUser)
+		}
+		roleRoutes := v1.Group("/roles")
+		{
+			rolesController := &controllers.RolesController{}
+			rolesController.Init(roleBase)
+			roleRoutes.Use(handler.PrivateACLCheckUserWrapper("UserManagement", true, false)).GET("/", rolesController.GetAll)
+			roleRoutes.Use(handler.PrivateACLCheckUserWrapper("UserManagement", true, true)).POST("insert", rolesController.InsertRole)
+			roleRoutes.Use(handler.PrivateACLCheckUserWrapper("UserManagement", true, true)).POST("update", rolesController.UpdateRole)
+			roleRoutes.Use(handler.PrivateACLCheckUserWrapper("UserManagement", true, true)).DELETE("delete/:id", rolesController.DeleteRole)
 		}
 		subjectRoutes := v1.Group("/subjects")
 		{

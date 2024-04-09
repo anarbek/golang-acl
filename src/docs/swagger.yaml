@@ -25,6 +25,8 @@ definitions:
         items:
           $ref: '#/definitions/models.RolePolicy'
         type: array
+      tenantId:
+        type: integer
     type: object
   models.RolePolicy:
     properties:
@@ -63,6 +65,94 @@ info:
   title: Swagger Example API
   version: "1.0"
 paths:
+  /roles:
+    get:
+      description: Get all roles from the database
+      operationId: get-all-roles
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Role'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get all roles
+      tags:
+      - Roles
+  /roles/delete/{id}:
+    delete:
+      description: delete a role from the database
+      operationId: delete-role
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Role deleted
+      security:
+      - BearerAuth: []
+      summary: Delete a role
+      tags:
+      - Roles
+  /roles/insert:
+    post:
+      consumes:
+      - application/json
+      description: Insert a new role into the database
+      operationId: insert-role
+      parameters:
+      - description: Role to add
+        in: body
+        name: role
+        required: true
+        schema:
+          $ref: '#/definitions/models.Role'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Role'
+      security:
+      - BearerAuth: []
+      summary: Insert a role
+      tags:
+      - Roles
+  /roles/update:
+    post:
+      consumes:
+      - application/json
+      description: Update an existing role in the database
+      operationId: update-role
+      parameters:
+      - description: Role to update
+        in: body
+        name: role
+        required: true
+        schema:
+          $ref: '#/definitions/models.Role'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Role'
+      security:
+      - BearerAuth: []
+      summary: Update a role
+      tags:
+      - Roles
   /users:
     get:
       description: get all users with their roles
@@ -79,6 +169,8 @@ paths:
       security:
       - BearerAuth: []
       summary: Get all users
+      tags:
+      - Users
   /users/delete/{id}:
     delete:
       description: delete a user from the database
@@ -97,6 +189,8 @@ paths:
       security:
       - BearerAuth: []
       summary: Delete a user
+      tags:
+      - Users
   /users/insert:
     post:
       consumes:
@@ -120,6 +214,8 @@ paths:
       security:
       - BearerAuth: []
       summary: Insert a new user
+      tags:
+      - Users
   /users/update:
     post:
       consumes:
@@ -148,6 +244,8 @@ paths:
       security:
       - BearerAuth: []
       summary: Update an existing user
+      tags:
+      - Users
 securityDefinitions:
   BearerAuth:
     in: header
