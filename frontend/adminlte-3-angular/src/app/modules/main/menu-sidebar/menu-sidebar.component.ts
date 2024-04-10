@@ -16,11 +16,7 @@ export class MenuSidebarComponent implements OnInit {
     @HostBinding('class') classes: string = BASE_CLASSES;
     public ui: Observable<UiState>;
     public user;
-    public menu: ({ 
-        name: string;
-        permission:string; iconClasses: string; path: string[]; children?: undefined; } | { 
-        name: string;permission:string; iconClasses: string; children: { 
-            name: string; permission:string; iconClasses: string; path: string[]; }[]; path?: undefined; })[] = [];
+    public menu: MenuItem[] = [];
 
     constructor(
         public appService: AppService,
@@ -53,6 +49,14 @@ export class MenuSidebarComponent implements OnInit {
         });
     }
 }
+
+interface MenuItem {
+    name: string;
+    permission: string;
+    iconClasses: string;
+    path?: string[];
+    children?: MenuItem[];
+  }
 
 export const MENU = [
     {
