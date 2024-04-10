@@ -16,8 +16,31 @@ func (roleBase *RoleBase) Init() {
 	roleBase.roleAbstract = NewRoleAbstract()
 }
 
-func (roleBase *RoleBase) UsersAll() []models.Role {
+func (roleBase *RoleBase) RolesAll() []models.Role {
 	return roleBase.roleAbstract.RolesAll()
+}
+
+func (roleBase *RoleBase) GetPermissionsForLoggedinUser(loggedInUser *models.User) []string {
+	currRole := GetRole(loggedInUser.RoleID)
+	var permissions []string
+
+	// Iterate over the RolePolicies of the current role
+	for _, rolePolicy := range currRole.RolePolicies {
+		// Get the policy associated with the RolePolicy
+		policy := GetPolicy(rolePolicy.PolicyID)
+
+		// Check the Read and Write permissions and add them to the permissions slice
+		if rolePolicy.Read {
+			permissions = append(permissions, policy.Code+".r")
+		}
+		if rolePolicy.Write {
+			permissions = append(permissions, policy.Code+".w")
+		}
+	}
+
+	// Return the permissions slice
+	return permissions
+
 }
 
 func (roleBase *RoleBase) Roles(loggedInUser *models.User) []models.Role {
@@ -206,4 +229,16 @@ func (acl *RoleAbstract) DeleteRole(id int, loggedInUser *models.User, fnGetRole
 	}
 
 	return LogErr("user with ID %d not found", id)
+}
+
+func GetPolicy(policyID int) models.Policy {
+	// Get the policy from the Policies slice
+	var policy models.Policy
+	for _, p := range Policies {
+		if p.ID == policyID {
+			policy = p
+			break
+		}
+	}
+	return policy
 }

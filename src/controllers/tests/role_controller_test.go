@@ -1,8 +1,10 @@
 package controllers
 
 import (
+	"encoding/json"
 	"gokg/gomvc/controllers"
 	"gokg/gomvc/repositories"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -152,6 +154,38 @@ func TestUpdateRoleAsTenant(t *testing.T) {
 			setup.Router.ServeHTTP(response, request)
 
 			assert.Equal(t, tc.expectedCode, response.Code)
+		})
+	}
+}
+
+func TestGetPermissionsForLoggedInUser(t *testing.T) {
+	setup := RoleTestSetup(SuperAdminMiddleware())
+
+	setup.Router.GET("/permissionsforuser", setup.RoleController.GetPermissionsForLoggedInUser)
+
+	testCases := []struct {
+		name          string
+		expectedCode  int
+		expectedRoles []string
+	}{
+		{"SuperAdmin", http.StatusOK, []string{"UserManagement.r", "UserManagement.w", "SubjectManagement.r", "SubjectManagement.w"}},
+		// Add more test cases here for other roles
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			request, _ := http.NewRequest("GET", "/permissionsforuser", nil)
+			response := httptest.NewRecorder()
+
+			setup.Router.ServeHTTP(response, request)
+
+			assert.Equal(t, tc.expectedCode, response.Code)
+
+			body, _ := ioutil.ReadAll(response.Body)
+			var roles []string
+			json.Unmarshal(body, &roles)
+
+			assert.ElementsMatch(t, tc.expectedRoles, roles)
 		})
 	}
 }

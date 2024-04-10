@@ -116,6 +116,35 @@ const docTemplate = `{
                 }
             }
         },
+        "/roles/permissionsforuser": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get permissions for the logged in user from the database",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Roles"
+                ],
+                "summary": "Get permissions for logged in user",
+                "operationId": "get-permissions-for-loggedin-user",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/roles/update": {
             "post": {
                 "security": [
@@ -167,9 +196,6 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
-                "tags": [
-                    "Users"
-                ],
                 "summary": "Get all users",
                 "operationId": "get-all-users",
                 "responses": {
@@ -195,9 +221,6 @@ const docTemplate = `{
                 "description": "delete a user from the database",
                 "produces": [
                     "application/json"
-                ],
-                "tags": [
-                    "Users"
                 ],
                 "summary": "Delete a user",
                 "operationId": "delete-user",
@@ -230,9 +253,6 @@ const docTemplate = `{
                 ],
                 "produces": [
                     "application/json"
-                ],
-                "tags": [
-                    "Users"
                 ],
                 "summary": "Insert a new user",
                 "operationId": "insert-user",
@@ -270,9 +290,6 @@ const docTemplate = `{
                 ],
                 "produces": [
                     "application/json"
-                ],
-                "tags": [
-                    "Users"
                 ],
                 "summary": "Update an existing user",
                 "operationId": "update-user",
@@ -343,6 +360,9 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/models.RolePolicy"
                     }
+                },
+                "roleTypeId": {
+                    "type": "integer"
                 },
                 "tenantId": {
                     "type": "integer"

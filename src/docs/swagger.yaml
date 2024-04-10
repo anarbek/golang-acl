@@ -25,6 +25,8 @@ definitions:
         items:
           $ref: '#/definitions/models.RolePolicy'
         type: array
+      roleTypeId:
+        type: integer
       tenantId:
         type: integer
     type: object
@@ -128,6 +130,24 @@ paths:
       summary: Insert a role
       tags:
       - Roles
+  /roles/permissionsforuser:
+    get:
+      description: Get permissions for the logged in user from the database
+      operationId: get-permissions-for-loggedin-user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get permissions for logged in user
+      tags:
+      - Roles
   /roles/update:
     post:
       consumes:
@@ -169,8 +189,6 @@ paths:
       security:
       - BearerAuth: []
       summary: Get all users
-      tags:
-      - Users
   /users/delete/{id}:
     delete:
       description: delete a user from the database
@@ -189,8 +207,6 @@ paths:
       security:
       - BearerAuth: []
       summary: Delete a user
-      tags:
-      - Users
   /users/insert:
     post:
       consumes:
@@ -214,8 +230,6 @@ paths:
       security:
       - BearerAuth: []
       summary: Insert a new user
-      tags:
-      - Users
   /users/update:
     post:
       consumes:
@@ -244,8 +258,6 @@ paths:
       security:
       - BearerAuth: []
       summary: Update an existing user
-      tags:
-      - Users
 securityDefinitions:
   BearerAuth:
     in: header

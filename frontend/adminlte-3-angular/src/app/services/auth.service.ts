@@ -7,6 +7,7 @@ import { Injectable } from '@angular/core';
 export class AuthService {
   private readonly TOKEN_KEY = 'token';
   private readonly USER_KEY = 'user';
+  private readonly PERMISSIONS_KEY = 'permissions';
 
   constructor() { }
 
@@ -25,6 +26,15 @@ export class AuthService {
   getUser(): User | null {
     const user = localStorage.getItem(this.USER_KEY);
     return user ? JSON.parse(user) as User : null;
+  }
+
+  setPermissions(permissions: string[]): void {
+    localStorage.setItem(this.PERMISSIONS_KEY, JSON.stringify(permissions));
+  }
+
+  getPermissions(): string[] | null {
+    const permissions = localStorage.getItem(this.PERMISSIONS_KEY);
+    return permissions ? JSON.parse(permissions) as string[] : null;
   }
 
   decodeToken(token: string): any {

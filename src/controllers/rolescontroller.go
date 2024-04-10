@@ -36,6 +36,25 @@ func (u *RolesController) GetAll(c *gin.Context) {
 	c.JSON(200, users)
 }
 
+// @Summary Get permissions for logged in user
+// @Description Get permissions for the logged in user from the database
+// @ID get-permissions-for-loggedin-user
+// @Produce  json
+// @Security BearerAuth
+// @Success 200 {array} string
+// @Router /roles/permissionsforuser [get]
+// @Tags Roles
+func (u *RolesController) GetPermissionsForLoggedInUser(c *gin.Context) {
+	loggedInUser, ok := GetLoggedInUser(c)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to assert Role"})
+		return
+	}
+	roles := u.acl.GetPermissionsForLoggedinUser(loggedInUser)
+	// implement your logic here
+	c.JSON(200, roles)
+}
+
 // @Summary Insert a role
 // @Description Insert a new role into the database
 // @ID insert-role

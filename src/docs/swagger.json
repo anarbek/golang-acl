@@ -110,6 +110,35 @@
                 }
             }
         },
+        "/roles/permissionsforuser": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get permissions for the logged in user from the database",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Roles"
+                ],
+                "summary": "Get permissions for logged in user",
+                "operationId": "get-permissions-for-loggedin-user",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/roles/update": {
             "post": {
                 "security": [
@@ -161,9 +190,6 @@
                 "produces": [
                     "application/json"
                 ],
-                "tags": [
-                    "Users"
-                ],
                 "summary": "Get all users",
                 "operationId": "get-all-users",
                 "responses": {
@@ -189,9 +215,6 @@
                 "description": "delete a user from the database",
                 "produces": [
                     "application/json"
-                ],
-                "tags": [
-                    "Users"
                 ],
                 "summary": "Delete a user",
                 "operationId": "delete-user",
@@ -224,9 +247,6 @@
                 ],
                 "produces": [
                     "application/json"
-                ],
-                "tags": [
-                    "Users"
                 ],
                 "summary": "Insert a new user",
                 "operationId": "insert-user",
@@ -264,9 +284,6 @@
                 ],
                 "produces": [
                     "application/json"
-                ],
-                "tags": [
-                    "Users"
                 ],
                 "summary": "Update an existing user",
                 "operationId": "update-user",
@@ -337,6 +354,9 @@
                     "items": {
                         "$ref": "#/definitions/models.RolePolicy"
                     }
+                },
+                "roleTypeId": {
+                    "type": "integer"
                 },
                 "tenantId": {
                     "type": "integer"

@@ -346,6 +346,8 @@ func main() {
 	router := gin.New()
 	config := cors.DefaultConfig()
 	config.AllowAllOrigins = true
+	config.AllowMethods = []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD"}
+	config.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Authorization"}
 	router.Use(cors.New(config))
 	router.GET("/", index)
 	router.GET("/rnd", func(c *gin.Context) {
@@ -379,6 +381,7 @@ func main() {
 			rolesController := &controllers.RolesController{}
 			rolesController.Init(roleBase)
 			roleRoutes.Use(handler.PrivateACLCheckUserWrapper("UserManagement", true, false)).GET("/", rolesController.GetAll)
+			roleRoutes.Use(handler.PrivateACLCheckUserWrapper("UserManagement", true, false)).GET("permissionsforuser", rolesController.GetPermissionsForLoggedInUser)
 			roleRoutes.Use(handler.PrivateACLCheckUserWrapper("UserManagement", true, true)).POST("insert", rolesController.InsertRole)
 			roleRoutes.Use(handler.PrivateACLCheckUserWrapper("UserManagement", true, true)).POST("update", rolesController.UpdateRole)
 			roleRoutes.Use(handler.PrivateACLCheckUserWrapper("UserManagement", true, true)).DELETE("delete/:id", rolesController.DeleteRole)
