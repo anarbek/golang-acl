@@ -11,6 +11,8 @@ var Roles = []models.Role{
 	{ID: models.ConstUserInt, Name: models.RolesUser, Code: models.RolesUser, RoleTypeId: models.ConstRoleTypeOtherInt, TenantID: 105},
 	{ID: models.ConstSuperAdminInt, Name: models.RolesSuperadmin, Code: models.RolesSuperadmin, RoleTypeId: models.ConstRoleTypeSuperAdminInt, TenantID: 105},
 	{ID: models.ConstTenantInt, Name: models.RolesTenant, Code: models.RolesTenant, RoleTypeId: models.ConstRoleTypeTenantInt, TenantID: 205},
+	{ID: models.ConstUserUnderTenantInt, Name: models.RolesUserUnderTenant, Code: models.RolesUserUnderTenant, RoleTypeId: models.ConstRoleTypeOtherInt, TenantID: 205},
+	{ID: models.ConstAdminUnderTenantInt, Name: models.RolesAdminUnderTenant, Code: models.RolesAdminUnderTenant, RoleTypeId: models.ConstRoleTypeOtherInt, TenantID: 205},
 }
 
 var Policies = []models.Policy{
@@ -40,8 +42,10 @@ var Users = []models.User{
 	{ID: 3, Username: "Bob Doe", Password: "bob123", Email: "bob@example.com", RoleID: models.ConstAdminInt, TenantID: 3},
 	{ID: 4, Username: "Ken Doe", Password: "ken123", Email: "ken@example.com", RoleID: models.ConstUserInt, TenantID: 3},
 	{ID: 205, Username: "Tenant", Password: "tenant123", Email: "tenant@example.com", RoleID: models.ConstTenantInt, TenantID: 205},
-	{ID: 206, Username: "User under tenant", Password: "ut123", Email: "tuser@example.com", RoleID: models.ConstUserInt, TenantID: 205},
-	{ID: 207, Username: "Admin under tenant", Password: "at123", Email: "tadmin@example.com", RoleID: models.ConstAdminInt, TenantID: 205},
+	{ID: 206, Username: "UserUnderTenant", Password: "ut123", Email: "tuser@example.com", RoleID: models.ConstUserUnderTenantInt, TenantID: 205},
+	{ID: 207, Username: "Admin under tenant", Password: "at123", Email: "tadmin@example.com", RoleID: models.ConstAdminUnderTenantInt, TenantID: 205},
+	{ID: 208, Username: "Admin under tenant 2", Password: "adminundertenant2", Email: "adminundertenant2@example.com", RoleID: models.ConstAdminUnderTenantInt, TenantID: 205},
+	{ID: 209, Username: "User2 under tenant", Password: "ut2123", Email: "tuser2@example.com", RoleID: models.ConstUserUnderTenantInt, TenantID: 205},
 }
 
 type AclBase struct {
@@ -67,12 +71,12 @@ func (aclBase *AclBase) GetUserByUsernamePassword(loginParams models.LoginUser) 
 func (aclBase *AclBase) Users(loggedInUser *models.User) []models.User {
 	fmt.Println("users requested!")
 	loggedInUserRole := GetRole(loggedInUser.RoleID)
-	switch loggedInUserRole.Name {
-	case models.RolesSuperadmin:
+	switch loggedInUserRole.RoleTypeId {
+	case models.ConstRoleTypeSuperAdminInt:
 		// Superadmin can see all users
 		return aclBase.acl.UsersAll()
 
-	case models.RolesTenant, models.RolesAdmin:
+	case models.ConstRoleTypeTenantInt:
 		// Tenant and Admin can only see users with the same TenantID
 		return aclBase.acl.UsersByTenantID(loggedInUser.TenantID)
 
@@ -179,28 +183,38 @@ func (acl *AclAbstract) GetUserByUsernamePassword(loginParams models.LoginUser) 
 func checkRolePermissions(user, loggedInUser *models.User) error {
 	userToUpdateRole := GetRole(user.RoleID)
 	// Check the role of the loggedInUser and enforce the rules
-	switch loggedInUser.Role.Name {
-	case models.RolesSuperadmin:
-		if userToUpdateRole.Name == models.RolesSuperadmin {
+	switch loggedInUser.Role.RoleTypeId {
+	case models.ConstRoleTypeSuperAdminInt:
+		if userToUpdateRole.RoleTypeId == models.ConstRoleTypeSuperAdminInt {
 			return LogErr("superadmin cannot operate user with role %v", userToUpdateRole.Name)
 		}
-	case models.RolesTenant:
-		switch userToUpdateRole.Name {
-		case models.RolesSuperadmin:
+	case models.ConstRoleTypeTenantInt:
+		switch userToUpdateRole.RoleTypeId {
+		case models.ConstRoleTypeSuperAdminInt:
 			return LogErr("Tenant cannot work with superadmin")
-		case models.RolesTenant:
+		case models.ConstRoleTypeTenantInt:
 			if user.ID != loggedInUser.ID {
 				return LogErr("Tenant can work only with its own user")
 			}
-		case models.RolesAdmin, models.RolesUser:
+		default:
 			if user.TenantID != loggedInUser.TenantID {
 				return LogErr("tenant cannot operate user with role %v of other tenant", userToUpdateRole.Name)
 			}
 		}
-	case models.RolesAdmin:
-		if userToUpdateRole.Name != models.RolesUser {
-			return LogErr("admin cannot operate user with role %v", userToUpdateRole.Name)
+	case models.ConstRoleTypeOtherInt:
+		switch userToUpdateRole.RoleTypeId {
+		case models.ConstRoleTypeSuperAdminInt:
+			return LogErr("Tenant cannot work with superadmin")
+		case models.ConstRoleTypeTenantInt:
+			if user.ID != loggedInUser.ID {
+				return LogErr("Tenant can work only with its own user")
+			}
+		default:
+			if user.ID > 0 && user.TenantID != loggedInUser.TenantID {
+				return LogErr("This role: %v can work only with its own tenant user", loggedInUser.Role.Name)
+			}
 		}
+
 	default:
 		return LogErr("invalid role %v", userToUpdateRole.Name)
 	}

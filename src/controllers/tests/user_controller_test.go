@@ -39,14 +39,16 @@ func AdminMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Here you would retrieve your user. This is just an example.
 		user := models.User{
-			ID:       1,
+			ID:       207,
 			Username: "Test User",
-			TenantID: 1,
-			RoleID:   models.ConstAdminInt,
+			TenantID: 205,
+			RoleID:   models.ConstAdminUnderTenantInt,
 			Role: models.Role{
-				ID:   models.ConstAdminInt,
-				Code: models.RolesAdmin,
-				Name: models.RolesAdmin,
+				ID:         models.ConstAdminUnderTenantInt,
+				Code:       models.RolesAdminUnderTenant,
+				Name:       models.RolesAdminUnderTenant,
+				TenantID:   205,
+				RoleTypeId: models.ConstRoleTypeOtherInt,
 			},
 			// Fill out the rest of the user fields...
 		}
@@ -68,9 +70,11 @@ func SuperAdminMiddleware() gin.HandlerFunc {
 			TenantID: 105,
 			RoleID:   models.ConstSuperAdminInt,
 			Role: models.Role{
-				ID:   models.ConstSuperAdminInt,
-				Code: models.RolesSuperadmin,
-				Name: models.RolesSuperadmin,
+				ID:         models.ConstSuperAdminInt,
+				Code:       models.RolesSuperadmin,
+				Name:       models.RolesSuperadmin,
+				TenantID:   105,
+				RoleTypeId: models.ConstRoleTypeSuperAdminInt,
 			},
 			// Fill out the rest of the user fields...
 		}
@@ -92,9 +96,11 @@ func TenantMiddleware() gin.HandlerFunc {
 			TenantID: 205,
 			RoleID:   models.ConstTenantInt,
 			Role: models.Role{
-				ID:   models.ConstTenantInt,
-				Code: models.RolesTenant,
-				Name: models.RolesTenant,
+				ID:         models.ConstTenantInt,
+				Code:       models.RolesTenant,
+				Name:       models.RolesTenant,
+				TenantID:   205,
+				RoleTypeId: models.ConstRoleTypeTenantInt,
 			},
 			// Fill out the rest of the user fields...
 		}
@@ -117,10 +123,10 @@ func TestInsertUserAsAdmin(t *testing.T) {
 		userJson     string
 		expectedCode int
 	}{
-		{"valid user", `{"username": "Alice", "email": "alice@example.com", "roleId": 2}`, http.StatusOK},
-
-		{"same name", `{"username": "Alice", "email": "alice@example.com", "roleId": 2}`, http.StatusInternalServerError},
-		{"admin cannot create admin role", `{"username": "Alice2", "email": "alice@example.com", "roleId": 1}`, http.StatusInternalServerError},
+		{"valid user", `{"username": "Alice", "email": "alice@example.com", "roleId": 5}`, http.StatusOK},
+		{"valid user 2", `{"username": "AUnderTenant", "email": "AUnderTenant@example.com", "roleId": 6}`, http.StatusOK},
+		{"same name", `{"username": "Alice", "email": "alice@example.com", "roleId": 5}`, http.StatusInternalServerError},
+		{"admin can create admin role", `{"username": "Alice2", "email": "alice@example.com", "roleId": 6}`, http.StatusOK},
 		{"admin cannot create superadmin", `{"username": "Alice3", "email": "alice@example.com", "roleId": 3}`, http.StatusInternalServerError},
 		{"admin cannot create tenant", `{"username": "Alice4", "email": "alice@example.com", "roleId": 4}`, http.StatusInternalServerError},
 	}
@@ -152,8 +158,8 @@ func TestInsertUserAsSuperAdmin(t *testing.T) {
 	}{
 		{"valid user", `{"username": "AliceS", "email": "alice@example.com", "roleId": 2}`, http.StatusOK},
 		{"same name", `{"username": "AliceS", "email": "alice@example.com", "roleId": 2}`, http.StatusInternalServerError},
-		{"superadmin can create admin role", `{"username": "Alice2", "email": "alice@example.com", "roleId": 1}`, http.StatusOK},
-		{"same name error should be", `{"username": "Alice2", "email": "alice@example.com", "roleId": 4}`, http.StatusInternalServerError},
+		{"superadmin can create admin role", `{"username": "SuperAlice2", "email": "alice@example.com", "roleId": 1}`, http.StatusOK},
+		{"same name error should be", `{"username": "SuperAlice2", "email": "alice@example.com", "roleId": 4}`, http.StatusInternalServerError},
 		{"superadmin can create tenant role", `{"username": "Alice12", "email": "alice@example.com", "roleId": 4}`, http.StatusOK},
 		{"superadmin cannot create superadmin", `{"username": "Alice3", "email": "alice@example.com", "roleId": 3}`, http.StatusInternalServerError},
 		{"superadmin can create tenant", `{"username": "Alice4", "email": "alice@example.com", "roleId": 4}`, http.StatusOK},
@@ -181,8 +187,8 @@ func TestInsertUserAsTenant(t *testing.T) {
 		userJson     string
 		expectedCode int
 	}{
-		{"valid user", `{"username": "TuserS", "email": "alice@example.com", "roleId": 2}`, http.StatusOK},
-		{"same name", `{"username": "TuserS", "email": "alice@example.com", "roleId": 2}`, http.StatusInternalServerError},
+		{"valid user", `{"username": "TuserS", "email": "alice@example.com", "roleId": 6}`, http.StatusOK},
+		{"same name", `{"username": "TuserS", "email": "alice@example.com", "roleId": 6}`, http.StatusInternalServerError},
 		{"tenant can create admin role", `{"username": "tuser2", "email": "alice@example.com", "roleId": 1}`, http.StatusOK},
 		{"same name error", `{"username": "tuser2", "email": "alice@example.com", "roleId": 4}`, http.StatusInternalServerError},
 		{"tenant cannot create tenant role", `{"username": "Alice12", "email": "alice@example.com", "roleId": 4}`, http.StatusInternalServerError},
@@ -213,11 +219,11 @@ func TestUpdateUserAsAdmin(t *testing.T) {
 		userJson     string
 		expectedCode int
 	}{
-		{"admin cannot operate with admin", `{"id": 1, "username": "Bob", "email": "bob@example.com", "roleId": 2}`, http.StatusInternalServerError},
-		{"valid", `{"id": 2, "username": "Jane1", "email": "jane1@example.com", "roleId": 2}`, http.StatusOK},
-		{"admin cannot change user role to admin", `{"id": 2, "username": "Jane1", "email": "jane1@example.com", "roleId": 1}`, http.StatusInternalServerError},
-		{"might not take same name", `{"id": 2, "username": "Bob"}`, http.StatusInternalServerError},
-		{"name already taken", `{"id": 1, "username": "Jane Doe"}`, http.StatusInternalServerError},
+		{"admin can operate with admin", `{"id": 208, "username": "BobUA", "email": "bob@example.com", "roleId": 5}`, http.StatusOK},
+		{"valid", `{"id": 207, "username": "Jane1", "email": "jane1@example.com", "roleId": 5}`, http.StatusOK},
+		{"admin can change user role to admin", `{"id": 209, "username": "Janeadminadmin1", "email": "Janeadminadmin1@example.com", "roleId": 6}`, http.StatusOK},
+		{"might not take same name", `{"id": 209, "username": "BobUA"}`, http.StatusInternalServerError},
+		{"name already taken", `{"id": 209, "username": "John Doe"}`, http.StatusInternalServerError},
 	}
 
 	for _, tc := range testCases {
@@ -308,7 +314,11 @@ func TestDeleteUserAsAdmin(t *testing.T) {
 		userId       string
 		expectedCode int
 	}{
-		{"valid user", "2", http.StatusOK},
+		{"admin should not be able to delete", "205", http.StatusInternalServerError},
+		{"admin should not be able to delete", "206", http.StatusInternalServerError},
+		{"admin should not be able to delete", "207", http.StatusInternalServerError},
+		{"admin should not be able to delete", "208", http.StatusInternalServerError},
+		{"admin should not be able to delete", "2", http.StatusInternalServerError},
 		{"invalid user", "abc", http.StatusBadRequest},
 		{"nonexistent user", "9999", http.StatusInternalServerError},
 		{"same id", "1", http.StatusInternalServerError},
