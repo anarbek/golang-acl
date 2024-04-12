@@ -46,7 +46,13 @@
                 </div>
             </div>
             <div class="card-body">
-                Start creating your amazing application!
+                <div *ngIf="displayTable">
+                    <table
+                        datatable
+                        [dtOptions]="dtOptions"
+                        class="row-border hover table table-bordered"
+                    ></table>
+                </div>
             </div>
             <!-- /.card-body -->
             <div class="card-footer"></div>

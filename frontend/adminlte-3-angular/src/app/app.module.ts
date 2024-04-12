@@ -37,6 +37,8 @@ import {SidebarSearchComponent} from './components/sidebar-search/sidebar-search
 import {NgxGoogleAnalyticsModule} from 'ngx-google-analytics';
 import { environment } from 'environments/environment';
 import { AuthInterceptor } from './interceptors/auth.interceptor';
+import { DataTablesModule } from "angular-datatables";
+import { RolesComponent } from '@pages/roles/roles.component';
 
 registerLocaleData(localeEn, 'en-EN');
 
@@ -62,7 +64,8 @@ registerLocaleData(localeEn, 'en-EN');
         SubMenuComponent,
         MenuItemComponent,
         ControlSidebarComponent,
-        SidebarSearchComponent
+        SidebarSearchComponent,
+        RolesComponent,
     ],
     imports: [
         ProfabricComponentsModule,
@@ -73,6 +76,7 @@ registerLocaleData(localeEn, 'en-EN');
         AppRoutingModule,
         ReactiveFormsModule,
         BrowserAnimationsModule,
+        DataTablesModule,
         ToastrModule.forRoot({
             timeOut: 3000,
             positionClass: 'toast-top-right',
