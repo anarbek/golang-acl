@@ -1,3 +1,4 @@
+import { Role } from '@/models/role';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
@@ -7,9 +8,14 @@ import { Observable } from 'rxjs';
 })
 export class RoleService {
   private apiUrl = 'http://localhost:8081/api/v1/roles/';
+
   constructor(private http: HttpClient,) { }
 
   getRoles(): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}`)
+  }
+
+  getRole(id: number): Observable<Role> {
+    return this.http.get<Role>(`${this.apiUrl}${id}`)
   }
 }

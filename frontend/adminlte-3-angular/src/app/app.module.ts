@@ -10,7 +10,7 @@ import {HeaderComponent} from '@modules/main/header/header.component';
 import {FooterComponent} from '@modules/main/footer/footer.component';
 import {MenuSidebarComponent} from '@modules/main/menu-sidebar/menu-sidebar.component';
 import {BlankComponent} from '@pages/blank/blank.component';
-import {ReactiveFormsModule} from '@angular/forms';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {ProfileComponent} from '@pages/profile/profile.component';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {RegisterComponent} from '@modules/register/register.component';
@@ -39,6 +39,7 @@ import { environment } from 'environments/environment';
 import { AuthInterceptor } from './interceptors/auth.interceptor';
 import { DataTablesModule } from "angular-datatables";
 import { RolesComponent } from '@pages/roles/roles.component';
+import { RoleEditComponent } from '@pages/roles/role-edit/role-edit.component';
 
 registerLocaleData(localeEn, 'en-EN');
 
@@ -66,8 +67,11 @@ registerLocaleData(localeEn, 'en-EN');
         ControlSidebarComponent,
         SidebarSearchComponent,
         RolesComponent,
+        RoleEditComponent
     ],
-    imports: [
+    imports: [        
+        FormsModule,
+        ReactiveFormsModule,
         ProfabricComponentsModule,
         CommonModule,
         BrowserModule,

@@ -1,0 +1,87 @@
+<div class="modal" tabindex="-1" role="dialog" id="editModal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Role</h5>
+                <button
+                    type="button"
+                    class="close"
+                    data-dismiss="modal"
+                    aria-label="Close"
+                >
+                    <span aria-hidden="true" (click)="closeModal()">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form [formGroup]="roleForm">                    
+                    <div class="form-group">
+                        <label for="roleCode">Role Code</label>
+                        <input type="text" class="form-control" id="roleCode" placeholder="Enter Role Code"
+                            formControlName="roleCode">
+                        <div *ngIf="roleForm.controls.roleCode.invalid && (roleForm.controls.roleCode.dirty || roleForm.controls.roleCode.touched)"
+                            class="alert alert-danger">
+                            <div *ngIf="roleForm.controls.roleCode.errors.required">
+                                Role Code is required.
+                            </div>
+                            <div *ngIf="roleForm.controls.roleCode.errors.minlength">
+                                Role Code must be at least 5 characters long.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="roleName">Role Name</label>
+                        <input type="text" class="form-control" id="roleName" placeholder="Enter Role Name"
+                            formControlName="roleName">
+                        <div *ngIf="roleForm.controls.roleName.invalid && (roleForm.controls.roleName.dirty || roleForm.controls.roleName.touched)"
+                            class="alert alert-danger">
+                            <div *ngIf="roleForm.controls.roleName.errors.required">
+                                Role Name is required.
+                            </div>
+                            <div *ngIf="roleForm.controls.roleName.errors.minlength">
+                                Role Name must be at least 5 characters long.
+                            </div>
+                        </div>                        
+                    </div>
+                    <!-- Add more fields as necessary -->
+                    <div formArrayName="rolePolicies" *ngFor="let rolePolicy of rolePolicies.controls; let i = index">
+                        <div [formGroupName]="i">
+                            <div class="form-group">
+                                <label for="policyName">Policy Name</label>
+                                <input type="text" class="form-control" id="policyName" placeholder="Enter Policy Name"
+                                    formControlName="policyName" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="read">Read</label>
+                                <input type="checkbox" class="form-control" id="read"
+                                    formControlName="read">
+                            </div>
+                            <div class="form-group">
+                                <label for="write">Write</label>
+                                <input type="checkbox" class="form-control" id="write"
+                                    formControlName="write">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button
+                    type="button"
+                    class="btn btn-primary"
+                    (click)="saveChanges()"
+                    [disabled]="!roleForm.valid"
+                >
+                    Save changes
+                </button>
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-dismiss="modal"
+                    (click)="closeModal()"
+                >
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

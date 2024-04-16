@@ -61,6 +61,19 @@ func (roleBase *RoleBase) Roles(loggedInUser *models.User) []models.Role {
 	}
 }
 
+func (roleBase *RoleBase) GetRole(loggedInUser *models.User, id int) (models.Role, error) {
+	roles := roleBase.Roles(loggedInUser)
+	if len(roles) > 0 {
+		for _, existingRole := range roles {
+			if existingRole.ID == id {
+				existingRole.RolePolicies = getRolePolicies(id)
+				return existingRole, nil
+			}
+		}
+	}
+	return models.Role{}, LogErr("role not found: %v", id)
+}
+
 func (roleBase *RoleBase) InsertRole(roleToInsert *models.Role, loggedInUser *models.User) error {
 	// Check if the user already exists
 	for _, existingRole := range Roles {

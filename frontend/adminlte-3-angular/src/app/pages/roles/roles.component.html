@@ -47,7 +47,7 @@
             </div>
             <div class="card-body">
                 <div *ngIf="displayTable">
-                    <table
+                    <table id="yourTableId"
                         datatable
                         [dtOptions]="dtOptions"
                         class="row-border hover table table-bordered"
@@ -62,3 +62,4 @@
     <!-- /.card -->
 </section>
 <!-- /.content -->
+<app-role-edit #roleEditComponent></app-role-edit>

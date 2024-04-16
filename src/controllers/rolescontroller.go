@@ -36,6 +36,37 @@ func (u *RolesController) GetAll(c *gin.Context) {
 	c.JSON(200, users)
 }
 
+// @Summary Get a role by ID
+// @Description Get a specific role from the database by ID
+// @ID get-role-by-id
+// @Produce  json
+// @Security BearerAuth
+// @Param id path int true "Role ID"
+// @Success 200 {object} models.Role
+// @Router /roles/{id} [get]
+// @Tags Roles
+func (u *RolesController) GetRole(c *gin.Context) {
+	loggedInUser, ok := GetLoggedInUser(c)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to assert Role"})
+		return
+	}
+
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid role ID"})
+		return
+	}
+
+	role, err := u.acl.GetRole(loggedInUser, id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(200, role)
+}
+
 // @Summary Get permissions for logged in user
 // @Description Get permissions for the logged in user from the database
 // @ID get-permissions-for-loggedin-user
