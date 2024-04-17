@@ -384,7 +384,7 @@ func main() {
 			roleRoutes.Use(handler.PrivateACLCheckUserWrapper("UserManagement", true, false)).GET("/:id", rolesController.GetRole)
 			roleRoutes.Use(handler.PrivateACLCheckUserWrapper("UserManagement", true, false)).GET("permissionsforuser", rolesController.GetPermissionsForLoggedInUser)
 			roleRoutes.Use(handler.PrivateACLCheckUserWrapper("UserManagement", true, true)).POST("insert", rolesController.InsertRole)
-			roleRoutes.Use(handler.PrivateACLCheckUserWrapper("UserManagement", true, true)).POST("update", rolesController.UpdateRole)
+			roleRoutes.Use(handler.PrivateACLCheckUserWrapper("UserManagement", true, true)).PUT("update", rolesController.UpdateRole)
 			roleRoutes.Use(handler.PrivateACLCheckUserWrapper("UserManagement", true, true)).DELETE("delete/:id", rolesController.DeleteRole)
 		}
 		subjectRoutes := v1.Group("/subjects")

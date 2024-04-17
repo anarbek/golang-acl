@@ -200,20 +200,31 @@ func (acl *RoleAbstract) InsertRole(roleToInsert *models.Role, loggedInRole *mod
 func (acl *RoleAbstract) UpdateRole(roleToUpdate *models.Role, loggedInUser *models.User) error {
 
 	// Lock the mutex before accessing Users
-	acl.mu.Lock()
-	defer acl.mu.Unlock()
+	//acl.mu.Lock()
+	//defer acl.mu.Unlock()
 
 	// Find the user to update
-	for i, existingUser := range Roles {
-		if existingUser.ID == roleToUpdate.ID {
-			if err := checkCurrentRolePermissions(&existingUser, loggedInUser); err != nil {
+	for i, existingRole := range Roles {
+		if existingRole.ID == roleToUpdate.ID {
+			if err := checkCurrentRolePermissions(&existingRole, loggedInUser); err != nil {
 				return err
 			}
 			// Update the role
 			Roles[i] = *roleToUpdate
 			//dont change tenant
-			Roles[i].TenantID = existingUser.TenantID
-			Roles[i].RoleTypeId = existingUser.RoleTypeId
+			Roles[i].TenantID = existingRole.TenantID
+			Roles[i].RoleTypeId = existingRole.RoleTypeId
+
+			// Update the role policies
+			for j, existingPolicy := range RolePolicies {
+				for _, newPolicy := range roleToUpdate.RolePolicies {
+					if existingPolicy.PolicyID == newPolicy.PolicyID {
+						// Update the policy
+						RolePolicies[j].Read = newPolicy.Read
+						RolePolicies[j].Write = newPolicy.Write
+					}
+				}
+			}
 
 			if err := checkCurrentRolePermissions(&Roles[i], loggedInUser); err != nil {
 				return err

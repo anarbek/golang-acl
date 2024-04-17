@@ -15,53 +15,56 @@
             <div class="modal-body">
                 <form [formGroup]="roleForm">                    
                     <div class="form-group">
-                        <label for="roleCode">Role Code</label>
-                        <input type="text" class="form-control" id="roleCode" placeholder="Enter Role Code"
-                            formControlName="roleCode">
-                        <div *ngIf="roleForm.controls.roleCode.invalid && (roleForm.controls.roleCode.dirty || roleForm.controls.roleCode.touched)"
+                        <label for="Code">Role Code</label>
+                        <input type="text" class="form-control" id="Code" placeholder="Enter Role Code"
+                            formControlName="Code">
+                        <div *ngIf="roleForm.controls.Code.invalid && (roleForm.controls.Code.dirty || roleForm.controls.Code.touched)"
                             class="alert alert-danger">
-                            <div *ngIf="roleForm.controls.roleCode.errors.required">
+                            <div *ngIf="roleForm.controls.Code.errors.required">
                                 Role Code is required.
                             </div>
-                            <div *ngIf="roleForm.controls.roleCode.errors.minlength">
-                                Role Code must be at least 5 characters long.
+                            <div *ngIf="roleForm.controls.Code.errors.minlength">
+                                Role Code must be at least 4 characters long.
                             </div>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="roleName">Role Name</label>
-                        <input type="text" class="form-control" id="roleName" placeholder="Enter Role Name"
-                            formControlName="roleName">
-                        <div *ngIf="roleForm.controls.roleName.invalid && (roleForm.controls.roleName.dirty || roleForm.controls.roleName.touched)"
+                        <label for="Name">Role Name</label>
+                        <input type="text" class="form-control" id="Name" placeholder="Enter Role Name"
+                            formControlName="Name">
+                        <div *ngIf="roleForm.controls.Name.invalid && (roleForm.controls.Name.dirty || roleForm.controls.Name.touched)"
                             class="alert alert-danger">
-                            <div *ngIf="roleForm.controls.roleName.errors.required">
+                            <div *ngIf="roleForm.controls.Name.errors.required">
                                 Role Name is required.
                             </div>
-                            <div *ngIf="roleForm.controls.roleName.errors.minlength">
-                                Role Name must be at least 5 characters long.
+                            <div *ngIf="roleForm.controls.Name.errors.minlength">
+                                Role Name must be at least 4 characters long.
                             </div>
                         </div>                        
                     </div>
                     <!-- Add more fields as necessary -->
-                    <div formArrayName="rolePolicies" *ngFor="let rolePolicy of rolePolicies.controls; let i = index">
-                        <div [formGroupName]="i">
-                            <div class="form-group">
-                                <label for="policyName">Policy Name</label>
-                                <input type="text" class="form-control" id="policyName" placeholder="Enter Policy Name"
-                                    formControlName="policyName" readonly>
-                            </div>
-                            <div class="form-group">
-                                <label for="read">Read</label>
-                                <input type="checkbox" class="form-control" id="read"
-                                    formControlName="read">
-                            </div>
-                            <div class="form-group">
-                                <label for="write">Write</label>
-                                <input type="checkbox" class="form-control" id="write"
-                                    formControlName="write">
-                            </div>
-                        </div>
-                    </div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                            <th scope="col">Policy Name</th>
+                            <th scope="col">Read</th>
+                            <th scope="col">Write</th>
+                            </tr>
+                        </thead>
+                        <tbody formArrayName="rolePolicies">
+                            <tr *ngFor="let rolePolicy of rolePolicies.controls; let i = index" [formGroupName]="i">
+                            <td>
+                                {{ rolePolicy.get('policyName').value }}
+                            </td>
+                            <td>
+                                <input type="checkbox" class="form-control small-checkbox" formControlName="read">
+                            </td>
+                            <td>
+                                <input type="checkbox" class="form-control small-checkbox" formControlName="write">
+                            </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </form>
             </div>
             <div class="modal-footer">

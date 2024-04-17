@@ -18,10 +18,11 @@ type Policy struct {
 }
 
 type RolePolicy struct {
-	RoleID   int    `json:"roleId"`
-	Role     Role   `json:"role"`
-	Policy   Policy `json:"policy"`
-	PolicyID int    `json:"policyId"`
-	Read     bool   `json:"read"`
-	Write    bool   `json:"write"`
+	RoleID     int    `json:"roleId"`
+	Role       Role   `json:"role"`
+	Policy     Policy `json:"policy"`
+	PolicyName string `json:"policyName"`
+	PolicyID   int    `json:"policyId"`
+	Read       bool   `json:"read"`
+	Write      bool   `json:"write"`
 }

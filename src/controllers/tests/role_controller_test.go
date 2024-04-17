@@ -98,7 +98,7 @@ func TestInsertRoleAsTenant(t *testing.T) {
 func TestUpdateRoleAsSuperAdmin(t *testing.T) {
 	setup := RoleTestSetup(SuperAdminMiddleware())
 
-	setup.Router.POST("/update", setup.RoleController.UpdateRole)
+	setup.Router.PUT("/update", setup.RoleController.UpdateRole)
 
 	testCases := []struct {
 		name         string
@@ -117,7 +117,7 @@ func TestUpdateRoleAsSuperAdmin(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			request, _ := http.NewRequest("POST", "/update", strings.NewReader(tc.userJson))
+			request, _ := http.NewRequest("PUT", "/update", strings.NewReader(tc.userJson))
 			response := httptest.NewRecorder()
 
 			setup.Router.ServeHTTP(response, request)
@@ -130,7 +130,7 @@ func TestUpdateRoleAsSuperAdmin(t *testing.T) {
 func TestUpdateRoleAsTenant(t *testing.T) {
 	setup := RoleTestSetup(TenantMiddleware())
 
-	setup.Router.POST("/update", setup.RoleController.UpdateRole)
+	setup.Router.PUT("/update", setup.RoleController.UpdateRole)
 
 	testCases := []struct {
 		name         string
@@ -148,7 +148,7 @@ func TestUpdateRoleAsTenant(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			request, _ := http.NewRequest("POST", "/update", strings.NewReader(tc.userJson))
+			request, _ := http.NewRequest("PUT", "/update", strings.NewReader(tc.userJson))
 			response := httptest.NewRecorder()
 
 			setup.Router.ServeHTTP(response, request)

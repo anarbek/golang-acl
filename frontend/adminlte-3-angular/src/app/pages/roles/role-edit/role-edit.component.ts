@@ -12,56 +12,60 @@ export class RoleEditComponent {
   @Input() roleId: string;
   roleForm: FormGroup;
   policies: Policy[] = [];
-  constructor(private roleService: RoleService, private fb: FormBuilder){
+  constructor(private roleService: RoleService, private fb: FormBuilder) {
     this.roleForm = this.fb.group({
-        roleName: ['', [Validators.required, Validators.minLength(5)]],
-        roleCode: ['', [Validators.required, Validators.minLength(5)]],
-        rolePolicies: this.fb.array([])
+      Id: [''],  // Role ID
+      Name: ['', [Validators.required, Validators.minLength(4)]],
+      Code: ['', [Validators.required, Validators.minLength(4)]],
+      rolePolicies: this.fb.array([])
     });
     this.policies = [
-      { id: 1, name: 'UserManagement', code: 'UserManagement', description:'' },
-      { id: 2, name: 'RoleManagement', code: 'RoleManagement', description:''  },
-      { id: 3, name: 'SubjectManagement', code: 'SubjectManagement', description:''  }
-  ];
+      { id: 1, name: 'UserManagement', code: 'UserManagement', description: '' },
+      { id: 2, name: 'RoleManagement', code: 'RoleManagement', description: '' },
+      { id: 3, name: 'SubjectManagement', code: 'SubjectManagement', description: '' }
+    ];
   }
 
   createRolePolicy(policy: any): FormGroup {
-      return this.fb.group({
-          policyId: [policy.policy.id],
-          policyName: [policy.policy.name],
-          read: [policy.read],
-          write: [policy.write]
-      });
+    return this.fb.group({      
+      policyId: [policy.policy.id],
+      roleId: [policy.roleId],
+      policyName: [policy.policy.name],
+      read: [policy.read],
+      write: [policy.write]
+    });
   }
 
   get rolePolicies(): FormArray {
     return this.roleForm.get('rolePolicies') as FormArray;
   }
-  
+
   openEditModal(data: any) {
     this.roleId = data.id;
     console.log('id: ', data.id);
-  
+
     // Convert roleId to number
     const roleIdNumber = Number(this.roleId);
-  
+
     // Get role detail
     this.roleService.getRole(roleIdNumber).subscribe(role => {
       // TODO: Do something with the role data
       console.log(role);
       this.roleForm.patchValue({
-        roleName: role.name,
-        roleCode: role.code
+        Id: role.id,
+        Name: role.name,
+        Code: role.code
       });
-      
+
       // Create form groups for the role policies
       const rolePoliciesFGs = this.policies.map(policy => {
         // Find if the current policy is in the role's policies
-        const rolePolicy = role.rolePolicies.find(rp => rp.policy.id === policy.id);
+        const rolePolicy = role.rolePolicies ? role.rolePolicies.find(rp => rp.policy.id === policy.id) : null;
 
         // If the policy is found, use its read and write values, otherwise set them to false
         return this.createRolePolicy({
           policy: policy,
+          roleId: rolePolicy ? rolePolicy.roleId : -1,
           read: rolePolicy ? rolePolicy.read : false,
           write: rolePolicy ? rolePolicy.write : false
         });
@@ -81,7 +85,19 @@ export class RoleEditComponent {
   }
 
   saveChanges() {
-    // Add your code to save changes here.
-    console.log('Saving changes...');
+    if (this.roleForm.valid) {
+      const roleIdNumber = Number(this.roleId);
+      this.roleService.updateRole(roleIdNumber, this.roleForm.value).subscribe({
+        next: response => {
+          console.log('Role updated successfully', response);
+          this.closeModal();
+        },
+        error: error => {
+          console.error('Error updating role: ', error);
+        }
+      });
+    } else {
+      console.log('Role form is not valid');
+    }
   }
 }

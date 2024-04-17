@@ -18,4 +18,8 @@ export class RoleService {
   getRole(id: number): Observable<Role> {
     return this.http.get<Role>(`${this.apiUrl}${id}`)
   }
+
+  updateRole(id: number, role: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}update`, role);
+  }
 }
