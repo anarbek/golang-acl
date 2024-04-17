@@ -18,6 +18,7 @@ var Roles = []models.Role{
 var Policies = []models.Policy{
 	{ID: 1, Name: "UserManagement", Code: "UserManagement"},
 	{ID: 2, Name: "SubjectManagement", Code: "SubjectManagement"},
+	{ID: 3, Name: "SomeOtherManagement", Code: "SomeOtherManagement"},
 }
 
 var RolePolicies = []models.RolePolicy{

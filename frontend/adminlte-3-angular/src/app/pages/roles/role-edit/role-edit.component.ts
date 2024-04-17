@@ -21,8 +21,8 @@ export class RoleEditComponent {
     });
     this.policies = [
       { id: 1, name: 'UserManagement', code: 'UserManagement', description: '' },
-      { id: 2, name: 'RoleManagement', code: 'RoleManagement', description: '' },
-      { id: 3, name: 'SubjectManagement', code: 'SubjectManagement', description: '' }
+      { id: 2, name: 'SubjectManagement', code: 'SubjectManagement', description: '' },
+      { id: 3, name: 'SomeOtherManagement', code: 'SomeOtherManagement', description: '' }
     ];
   }
 
