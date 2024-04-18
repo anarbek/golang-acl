@@ -158,9 +158,10 @@ func checkCurrentRolePermissions(role *models.Role, loggedInUser *models.User) e
 	// Check the role of the loggedInUser and enforce the rules
 	switch loggedInRole.RoleTypeId {
 	case models.ConstRoleTypeSuperAdminInt:
-		if roleToUpdateRole.RoleTypeId == models.ConstRoleTypeSuperAdminInt {
-			return LogErr("superadmin cannot operate user with role %v", roleToUpdateRole.Name)
-		}
+		// if roleToUpdateRole.RoleTypeId == models.ConstRoleTypeSuperAdminInt {
+		// 	return LogErr("superadmin cannot operate user with role %v", roleToUpdateRole.Name)
+		// }
+		return nil
 	case models.ConstRoleTypeTenantInt:
 		switch roleToUpdateRole.RoleTypeId {
 		case models.ConstRoleTypeSuperAdminInt:
@@ -216,13 +217,28 @@ func (acl *RoleAbstract) UpdateRole(roleToUpdate *models.Role, loggedInUser *mod
 			Roles[i].RoleTypeId = existingRole.RoleTypeId
 
 			// Update the role policies
-			for j, existingPolicy := range RolePolicies {
-				for _, newPolicy := range roleToUpdate.RolePolicies {
-					if existingPolicy.PolicyID == newPolicy.PolicyID {
+			for _, newPolicy := range roleToUpdate.RolePolicies {
+				currPolicyFound := false
+				for j, existingPolicy := range RolePolicies {
+					if existingPolicy.RoleID == newPolicy.RoleID && existingPolicy.PolicyID == newPolicy.PolicyID {
 						// Update the policy
 						RolePolicies[j].Read = newPolicy.Read
 						RolePolicies[j].Write = newPolicy.Write
+						currPolicyFound = true
+						break
 					}
+				}
+				if !currPolicyFound {
+					// Create a copy of newPolicy
+					newPolicyCopy := models.RolePolicy{
+						RoleID:   newPolicy.RoleID,
+						PolicyID: newPolicy.PolicyID,
+						Read:     newPolicy.Read,
+						Write:    newPolicy.Write,
+					}
+
+					// Add new policy
+					RolePolicies = append(RolePolicies, newPolicyCopy)
 				}
 			}
 

@@ -65,7 +65,8 @@ export class RoleEditComponent {
         // If the policy is found, use its read and write values, otherwise set them to false
         return this.createRolePolicy({
           policy: policy,
-          roleId: rolePolicy ? rolePolicy.roleId : -1,
+          roleId: role.id,
+          policyId: policy.id,
           read: rolePolicy ? rolePolicy.read : false,
           write: rolePolicy ? rolePolicy.write : false
         });
