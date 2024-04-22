@@ -77,7 +77,7 @@ func (roleBase *RoleBase) GetRole(loggedInUser *models.User, id int) (models.Rol
 func (roleBase *RoleBase) InsertRole(roleToInsert *models.Role, loggedInUser *models.User) error {
 	// Check if the user already exists
 	for _, existingRole := range Roles {
-		if existingRole.Name == roleToInsert.Name && existingRole.TenantID == roleToInsert.TenantID {
+		if existingRole.Name == roleToInsert.Name && existingRole.TenantID == loggedInUser.TenantID {
 			return fmt.Errorf("role with Name %v already exists for current tenant", roleToInsert.Name)
 		}
 	}
@@ -185,8 +185,8 @@ func checkCurrentRolePermissions(role *models.Role, loggedInUser *models.User) e
 func (acl *RoleAbstract) InsertRole(roleToInsert *models.Role, loggedInRole *models.User) error {
 
 	// Lock the mutex before accessing _userCounter
-	acl.mu.Lock()
-	defer acl.mu.Unlock() // Move the defer statement here
+	//acl.mu.Lock()
+	//defer acl.mu.Unlock() // Move the defer statement here
 
 	roleToInsert.ID = acl._roleCount + 1
 	roleToInsert.TenantID = loggedInRole.TenantID
@@ -194,6 +194,20 @@ func (acl *RoleAbstract) InsertRole(roleToInsert *models.Role, loggedInRole *mod
 
 	// Append the new user to the Users slice
 	Roles = append(Roles, *roleToInsert)
+
+	// Insert the role policies
+	for _, newPolicy := range roleToInsert.RolePolicies {
+		// Create a copy of newPolicy
+		newPolicyCopy := models.RolePolicy{
+			RoleID:   roleToInsert.ID,
+			PolicyID: newPolicy.PolicyID,
+			Read:     newPolicy.Read,
+			Write:    newPolicy.Write,
+		}
+
+		// Add new policy
+		RolePolicies = append(RolePolicies, newPolicyCopy)
+	}
 
 	return nil
 }

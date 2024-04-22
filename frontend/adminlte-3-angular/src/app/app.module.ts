@@ -40,6 +40,7 @@ import { AuthInterceptor } from './interceptors/auth.interceptor';
 import { DataTablesModule } from "angular-datatables";
 import { RolesComponent } from '@pages/roles/roles.component';
 import { RoleEditComponent } from '@pages/roles/role-edit/role-edit.component';
+import { RoleCreateComponent } from '@pages/roles/role-create/role-create.component';
 
 registerLocaleData(localeEn, 'en-EN');
 
@@ -67,7 +68,8 @@ registerLocaleData(localeEn, 'en-EN');
         ControlSidebarComponent,
         SidebarSearchComponent,
         RolesComponent,
-        RoleEditComponent
+        RoleEditComponent,
+        RoleCreateComponent
     ],
     imports: [        
         FormsModule,

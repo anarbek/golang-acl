@@ -22,8 +22,8 @@
     <div class="container-fluid">
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title">Title</h3>
-
+                <h3 class="card-title">Roles</h3> <br>
+                <button class="btn btn-primary" (click)="openCreateModal()">Add Role</button>
                 <div class="card-tools">
                     <button
                         type="button"
@@ -62,4 +62,5 @@
     <!-- /.card -->
 </section>
 <!-- /.content -->
-<app-role-edit #roleEditComponent></app-role-edit>
+<app-role-edit #roleEditComponent (onClose)="getRoles()"></app-role-edit>
+<app-role-create #roleCreateComponent (onClose)="getRoles()"></app-role-create>

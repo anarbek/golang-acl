@@ -1,5 +1,5 @@
 import { Policy } from '@/models/policy';
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RoleService } from '@services/roles/role.service';
 
@@ -10,6 +10,7 @@ import { RoleService } from '@services/roles/role.service';
 })
 export class RoleEditComponent {
   @Input() roleId: string;
+  @Output() onClose = new EventEmitter<void>();
   roleForm: FormGroup;
   policies: Policy[] = [];
   constructor(private roleService: RoleService, private fb: FormBuilder) {
@@ -83,6 +84,7 @@ export class RoleEditComponent {
 
   closeModal() {
     $('#editModal').modal('hide');
+    this.onClose.emit();
   }
 
   saveChanges() {

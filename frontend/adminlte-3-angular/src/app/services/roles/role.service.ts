@@ -22,4 +22,8 @@ export class RoleService {
   updateRole(id: number, role: any): Observable<any> {
     return this.http.put(`${this.apiUrl}update`, role);
   }
+
+  insertRole(role: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}insert`, role);
+  }
 }

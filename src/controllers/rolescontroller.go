@@ -14,6 +14,7 @@ type RolesController struct {
 }
 
 func (u *RolesController) Init(_acl *repositories.RoleBase) {
+	_acl.Init()
 	u.acl = _acl
 }
 
