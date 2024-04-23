@@ -142,7 +142,7 @@ func (h *CustomLoginHandler) PrivateACLCheckUserWrapper(pageName string, read, w
 func privateACLCheckUser(c *gin.Context, h *CustomLoginHandler, pageName string, read, write bool) {
 	jwtToken, err := extractBearerToken(c.GetHeader("Authorization"))
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, UnsignedResponse{
+		c.AbortWithStatusJSON(http.StatusUnauthorized, UnsignedResponse{
 			Message: err.Error(),
 		})
 		return
@@ -150,7 +150,7 @@ func privateACLCheckUser(c *gin.Context, h *CustomLoginHandler, pageName string,
 
 	token, err := parseToken(jwtToken, h.secret)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, UnsignedResponse{
+		c.AbortWithStatusJSON(http.StatusUnauthorized, UnsignedResponse{
 			Message: "bad jwt token",
 		})
 		return
@@ -158,7 +158,7 @@ func privateACLCheckUser(c *gin.Context, h *CustomLoginHandler, pageName string,
 
 	claims, OK := token.Claims.(jwt.MapClaims)
 	if !OK {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, UnsignedResponse{
+		c.AbortWithStatusJSON(http.StatusUnauthorized, UnsignedResponse{
 			Message: "unable to parse claims",
 		})
 		return
@@ -166,7 +166,7 @@ func privateACLCheckUser(c *gin.Context, h *CustomLoginHandler, pageName string,
 
 	claimedUserID, OK := claims["userId"].(float64)
 	if !OK {
-		c.AbortWithStatusJSON(http.StatusBadRequest, UnsignedResponse{
+		c.AbortWithStatusJSON(http.StatusUnauthorized, UnsignedResponse{
 			Message: "no userId property in claims",
 		})
 		return
@@ -185,7 +185,7 @@ func privateACLCheckUser(c *gin.Context, h *CustomLoginHandler, pageName string,
 
 	// If the user was not found, return an error
 	if user.ID == 0 {
-		c.AbortWithStatusJSON(http.StatusBadRequest, UnsignedResponse{
+		c.AbortWithStatusJSON(http.StatusUnauthorized, UnsignedResponse{
 			Message: "user not found",
 		})
 		return

@@ -29,7 +29,7 @@ export class AuthInterceptor implements HttpInterceptor {
     return next.handle(authReq).pipe(
       catchError((error: HttpErrorResponse) => {
         // If the error status is 401 (Unauthorized), navigate to the login page
-        if (error.status === 401) {
+        if (error.status === 401 || error.status === 403) {
           this.appService.logout();
         }
 
