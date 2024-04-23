@@ -87,7 +87,13 @@ export class AppService {
             //const user = await getAuthStatus();
             let user = this.auth.getUser()
             if(user) {
-              this.user = user;
+              const isValidToken = await this.auth.checkTokenValidity();
+              if(isValidToken) {
+                  this.user = user;
+              } else {
+                  // If the token is not valid, redirect the user to the login page
+                  this.logout();
+              }
             } else {
               this.logout();
             }

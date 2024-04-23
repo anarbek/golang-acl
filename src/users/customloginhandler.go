@@ -2,6 +2,7 @@ package users
 
 import (
 	"errors"
+	"fmt"
 	"gokg/gomvc/repositories"
 	"net/http"
 	"strings"
@@ -32,12 +33,14 @@ type ILoginHandler interface {
 }
 
 type CustomLoginHandler struct {
-	num int
-	acl *repositories.AclBase
+	num    int
+	acl    *repositories.AclBase
+	secret string
 }
 
 func (h *CustomLoginHandler) Init(_acl *repositories.AclBase) {
 	h.acl = _acl
+	h.secret = "mk<ofPDZ34T5kJNII6'zV;DqSg_2V3HvW5`<-Kel*>sv/Nz)QIBL<%kq=#u'`eY"
 }
 
 func (h *CustomLoginHandler) SetRand(_num int) {
@@ -83,7 +86,7 @@ func (h *CustomLoginHandler) LoginUser(c *gin.Context) {
 			"exp":    expirationTime.Unix(), // Add the 'exp' claim
 		})
 
-		tokenStr, err := token.SignedString([]byte("supersaucysecret"))
+		tokenStr, err := token.SignedString([]byte(h.secret))
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, UnsignedResponse{
 				Message: err.Error(),
@@ -103,6 +106,33 @@ func (h *CustomLoginHandler) LoginUser(c *gin.Context) {
 	})
 }
 
+func (h *CustomLoginHandler) VerifyToken(c *gin.Context) {
+	// Get the token from the Authorization header
+	tokenString := c.GetHeader("Authorization")
+
+	// Replace "Bearer " prefix (if it exists)
+	tokenString = strings.TrimPrefix(tokenString, "Bearer ")
+
+	// Parse and validate the token
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return []byte(h.secret), nil // replace with your secret key
+	})
+
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+		return
+	}
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		c.JSON(http.StatusOK, gin.H{"user": claims["user"]})
+	} else {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+	}
+}
+
 func (h *CustomLoginHandler) PrivateACLCheckUserWrapper(pageName string, read, write bool) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		privateACLCheckUser(c, h, pageName, read, write)
@@ -118,7 +148,7 @@ func privateACLCheckUser(c *gin.Context, h *CustomLoginHandler, pageName string,
 		return
 	}
 
-	token, err := parseToken(jwtToken)
+	token, err := parseToken(jwtToken, h.secret)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, UnsignedResponse{
 			Message: "bad jwt token",
@@ -207,12 +237,12 @@ func extractBearerToken(header string) (string, error) {
 	return jwtToken[1], nil
 }
 
-func parseToken(jwtToken string) (*jwt.Token, error) {
+func parseToken(jwtToken string, secret string) (*jwt.Token, error) {
 	token, err := jwt.Parse(jwtToken, func(token *jwt.Token) (interface{}, error) {
 		if _, OK := token.Method.(*jwt.SigningMethodHMAC); !OK {
 			return nil, errors.New("bad signed method received")
 		}
-		return []byte("supersaucysecret"), nil
+		return []byte(secret), nil
 	})
 
 	if err != nil {

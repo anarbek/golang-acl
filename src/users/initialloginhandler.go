@@ -75,7 +75,7 @@ func (h *InitialLoginHandler) PrivateACLCheckUserWrapper(pageName string, read, 
 			return
 		}
 
-		token, err := parseToken(jwtToken)
+		token, err := parseToken(jwtToken, "supersaucysecret")
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusBadRequest, UnsignedResponse{
 				Message: "bad jwt token",

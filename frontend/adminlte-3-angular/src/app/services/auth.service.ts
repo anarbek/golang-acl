@@ -1,5 +1,8 @@
 import { User } from '@/models/user';
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
+
 
 @Injectable({
   providedIn: 'root'
@@ -8,8 +11,9 @@ export class AuthService {
   private readonly TOKEN_KEY = 'token';
   private readonly USER_KEY = 'user';
   private readonly PERMISSIONS_KEY = 'permissions';
+  private verifyUrl = 'http://localhost:8081/verifyToken';
 
-  constructor() { }
+  constructor(private http: HttpClient) { }
 
   setToken(token: string): void {
     localStorage.setItem(this.TOKEN_KEY, token);
@@ -39,6 +43,24 @@ export class AuthService {
 
   decodeToken(token: string): any {
     return jwt_decode(token);
+  }
+
+  checkTokenValidity(): Promise<boolean> {
+    let token = this.getToken();
+    const response$ = this.http.post(this.verifyUrl, { token }, { observe: 'response' });
+
+    return firstValueFrom(response$)
+      .then(response => {
+        if (response.status === 200) {
+          return true;
+        } else {
+          return false;
+        }
+      })
+      .catch(error => {
+        console.error('Error verifying token', error);
+        return false;
+      });
   }
 }
 

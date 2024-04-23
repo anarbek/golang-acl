@@ -356,6 +356,7 @@ func main() {
 
 	router.POST("/login", handlerExample.LoginUser)
 	router.POST("/loginUser", handler.LoginUser)
+	router.POST("/verifyToken", handler.VerifyToken)
 	/*router.Use(handler.PrivateACLCheckUserWrapper("UserManagement", true, false)).GET("/rndAuth", func(c *gin.Context) {
 		c.String(http.StatusOK, "(2)Random number: %d", number)
 	})*/
