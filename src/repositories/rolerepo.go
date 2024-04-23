@@ -78,7 +78,7 @@ func (roleBase *RoleBase) InsertRole(roleToInsert *models.Role, loggedInUser *mo
 	// Check if the user already exists
 	for _, existingRole := range Roles {
 		if existingRole.Name == roleToInsert.Name && existingRole.TenantID == loggedInUser.TenantID {
-			return fmt.Errorf("role with Name %v already exists for current tenant", roleToInsert.Name)
+			return LogErr("role with Name %v already exists for current tenant", roleToInsert.Name)
 		}
 	}
 	// if loggedInUser.TenantID != roleToInsert.TenantID {
@@ -263,7 +263,7 @@ func (acl *RoleAbstract) UpdateRole(roleToUpdate *models.Role, loggedInUser *mod
 		}
 	}
 
-	return fmt.Errorf("role with ID %d not found", roleToUpdate.ID)
+	return LogErr("role with ID %d not found", roleToUpdate.ID)
 }
 
 func (acl *RoleAbstract) DeleteRole(id int, loggedInUser *models.User, fnGetRoles RolesGetFunc) error {

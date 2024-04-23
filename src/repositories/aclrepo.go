@@ -3,7 +3,12 @@ package repositories
 import (
 	"fmt"
 	"gokg/gomvc/models"
+	"os"
 	"sync"
+
+	"github.com/natefinch/lumberjack"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 var Roles = []models.Role{
@@ -47,6 +52,25 @@ var Users = []models.User{
 	{ID: 207, Username: "Admin under tenant", Password: "at123", Email: "tadmin@example.com", RoleID: models.ConstAdminUnderTenantInt, TenantID: 205},
 	{ID: 208, Username: "Admin under tenant 2", Password: "adminundertenant2", Email: "adminundertenant2@example.com", RoleID: models.ConstAdminUnderTenantInt, TenantID: 205},
 	{ID: 209, Username: "User2 under tenant", Password: "ut2123", Email: "tuser2@example.com", RoleID: models.ConstUserUnderTenantInt, TenantID: 205},
+}
+
+func init() {
+	// Create a lumberjack logger
+	lumberjackLogger := &lumberjack.Logger{
+		Filename:   "logs/log.txt", // Filename is the name of the logfile
+		MaxSize:    10,             // MaxSize is the maximum size in megabytes of the log file before it gets rotated
+		MaxBackups: 3,              // MaxBackups is the maximum number of old log files to retain
+		LocalTime:  true,           // LocalTime determines if the time used for formatting the timestamps in backup files is the computer's local time (true) or UTC (false)
+		Compress:   true,           // Compress determines if the rotated log files should be compressed using gzip
+	}
+
+	// Set up zerolog to write to the lumberjack logger
+	//log.Logger = zerolog.New(lumberjackLogger).With().Timestamp().Logger()
+	// Set up zerolog to write to the lumberjack logger
+	log.Logger = zerolog.New(zerolog.MultiLevelWriter(lumberjackLogger, zerolog.ConsoleWriter{Out: os.Stderr})).With().Timestamp().Logger()
+
+	// Now you can use log.Print, log.Info, etc. and it will be written to the file
+	//log.Info().Msg("This is an info message")
 }
 
 type AclBase struct {
@@ -241,6 +265,7 @@ func (acl *AclAbstract) InsertUser(user, loggedInUser *models.User) error {
 
 func LogErr(format string, a ...any) error {
 	fmt.Println(format, a)
+	log.Error().Msgf(format, a...)
 	return fmt.Errorf(format, a...)
 }
 

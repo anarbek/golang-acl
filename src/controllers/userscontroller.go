@@ -9,6 +9,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func init() {
+
+}
+
 type UserController struct {
 	acl *repositories.AclBase
 }
