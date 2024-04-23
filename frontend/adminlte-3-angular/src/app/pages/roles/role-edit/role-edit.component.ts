@@ -2,6 +2,7 @@ import { Policy } from '@/models/policy';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RoleService } from '@services/roles/role.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-role-edit',
@@ -13,7 +14,9 @@ export class RoleEditComponent {
   @Output() onClose = new EventEmitter<void>();
   roleForm: FormGroup;
   policies: Policy[] = [];
-  constructor(private roleService: RoleService, private fb: FormBuilder) {
+  constructor(private roleService: RoleService, private fb: FormBuilder,
+    private toastr: ToastrService,
+  ) {
     this.roleForm = this.fb.group({
       Id: [''],  // Role ID
       Name: ['', [Validators.required, Validators.minLength(4)]],
@@ -96,7 +99,9 @@ export class RoleEditComponent {
           this.closeModal();
         },
         error: error => {
-          console.error('Error updating role: ', error);
+          let msg = `Error updating role: ${error.error.error}`
+          console.error(msg);
+          this.toastr.error(msg);          
         }
       });
     } else {

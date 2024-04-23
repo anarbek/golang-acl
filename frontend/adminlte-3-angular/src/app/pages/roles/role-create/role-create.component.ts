@@ -1,6 +1,7 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
 import { RoleService } from '@services/roles/role.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-role-create',
@@ -16,7 +17,9 @@ export class RoleCreateComponent implements OnInit {
     { id: 3, name: 'SomeOtherManagement', code: 'SomeOtherManagement', description: '' }
   ];
 
-  constructor(private fb: FormBuilder, private roleService: RoleService) {
+  constructor(private fb: FormBuilder, private roleService: RoleService,
+    private toastr: ToastrService,
+  ) {
     this.roleForm = this.fb.group({
       Name: ['', [Validators.required, Validators.minLength(4)]],
       Code: ['', [Validators.required, Validators.minLength(4)]],
@@ -60,7 +63,9 @@ export class RoleCreateComponent implements OnInit {
           this.closeModal();
         },
         error: error => {
-          console.error('Error inserting role: ', error);
+          let msg = `Error creating role: ${error.error.error}`
+          console.error(msg);
+          this.toastr.error(msg);
         }
       });
     } else {
