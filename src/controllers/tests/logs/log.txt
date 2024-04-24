@@ -1003,3 +1003,141 @@
 {"level":"error","time":"2024-04-24T18:56:32+02:00","message":"user with ID 9999 not found"}
 {"level":"error","time":"2024-04-24T18:56:32+02:00","message":"User has same ID, cannot be deleted"}
 {"level":"error","time":"2024-04-24T18:56:32+02:00","message":"user with ID 3 not found"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"audits len roleRepo: 0"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"audits len roleRepo: 0"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"role with Name Role1 already exists for current tenant"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"role with Name Superadmin already exists for current tenant"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"role with Name Admin already exists for current tenant"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"audits len roleRepo: 3"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"audits len roleRepo: 3"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"role with Name TenantRole1 already exists for current tenant"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"Tenant can work only with its own user roles"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"Tenant can work only with its own user roles"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"Tenant can work only with its own user roles"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"Tenant cannot work with superadmin"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"audits len roleRepo: 4"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"audits len roleRepo: 4"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"name SuperAdminRole1 is already taken for current tenant"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"audits len roleRepo: 7"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"audits len roleRepo: 7"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"name TenantRoleUpdated is already taken for current tenant"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"Tenant cannot work with superadmin"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"tenant cannot operate user with role Admin of other tenant"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"audits len roleRepo: 9"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"audits len roleRepo: 9"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"audits len aclRepo: 9"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"audits len aclRepo: 9"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"Tenant cannot work with superadmin"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"Tenant can work only with its own user"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"audits len aclRepo: 12"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"audits len aclRepo: 12"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"superadmin cannot operate user with role Superadmin"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"audits len aclRepo: 16"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"audits len aclRepo: 16"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"Tenant cannot work with superadmin"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"audits len aclRepo: 18"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"audits len aclRepo: 18"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"name BobUA is already taken"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"name John Doe is already taken"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"audits len aclRepo: 21"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"audits len aclRepo: 21"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"superadmin cannot operate user with role Superadmin"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"superadmin cannot operate user with role Superadmin"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"superadmin cannot operate user with role Superadmin"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"name Jane Doe is already taken"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"audits len aclRepo: 24"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"audits len aclRepo: 24"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"Tenant cannot work with superadmin"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"tenant cannot operate user with role User of other tenant"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"name tuser2 is already taken"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"Tenant can work only with its own user"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"Tenant cannot work with superadmin"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"name Jane Doe is already taken"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"audits len aclRepo: 28"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"audits len aclRepo: 28"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"user with ID 205 not found"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"user with ID 206 not found"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"User has same ID, cannot be deleted"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"user with ID 208 not found"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"user with ID 2 not found"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"user with ID 9999 not found"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"user with ID 1 not found"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"user with ID 3 not found"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"audits len aclRepo: 28"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"audits len aclRepo: 28"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"user with ID 9999 not found"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"User has same ID, cannot be deleted"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"audits len aclRepo: 29"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"audits len aclRepo: 29"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"user with ID 9999 not found"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"User has same ID, cannot be deleted"}
+{"level":"error","time":"2024-04-24T22:20:50+02:00","message":"user with ID 3 not found"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"audits len roleRepo: 0"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"audits len roleRepo: 0"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"role with Name Role1 already exists for current tenant"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"role with Name Superadmin already exists for current tenant"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"role with Name Admin already exists for current tenant"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"audits len roleRepo: 3"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"audits len roleRepo: 3"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"role with Name TenantRole1 already exists for current tenant"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"Tenant can work only with its own user roles"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"Tenant can work only with its own user roles"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"Tenant can work only with its own user roles"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"Tenant cannot work with superadmin"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"audits len roleRepo: 4"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"audits len roleRepo: 4"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"name SuperAdminRole1 is already taken for current tenant"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"audits len roleRepo: 7"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"audits len roleRepo: 7"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"name TenantRoleUpdated is already taken for current tenant"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"Tenant cannot work with superadmin"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"tenant cannot operate user with role Admin of other tenant"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"audits len roleRepo: 9"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"audits len roleRepo: 9"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"audits len aclRepo: 9"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"audits len aclRepo: 9"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"Tenant cannot work with superadmin"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"Tenant can work only with its own user"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"audits len aclRepo: 12"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"audits len aclRepo: 12"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"superadmin cannot operate user with role Superadmin"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"audits len aclRepo: 16"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"audits len aclRepo: 16"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"Tenant cannot work with superadmin"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"audits len aclRepo: 18"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"audits len aclRepo: 18"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"name BobUA is already taken"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"name John Doe is already taken"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"audits len aclRepo: 21"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"audits len aclRepo: 21"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"superadmin cannot operate user with role Superadmin"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"superadmin cannot operate user with role Superadmin"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"superadmin cannot operate user with role Superadmin"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"name Jane Doe is already taken"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"audits len aclRepo: 24"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"audits len aclRepo: 24"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"Tenant cannot work with superadmin"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"tenant cannot operate user with role User of other tenant"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"name tuser2 is already taken"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"Tenant can work only with its own user"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"Tenant cannot work with superadmin"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"name Jane Doe is already taken"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"audits len aclRepo: 28"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"audits len aclRepo: 28"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"user with ID 205 not found"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"user with ID 206 not found"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"User has same ID, cannot be deleted"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"user with ID 208 not found"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"user with ID 2 not found"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"user with ID 9999 not found"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"user with ID 1 not found"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"user with ID 3 not found"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"audits len aclRepo: 28"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"audits len aclRepo: 28"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"user with ID 9999 not found"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"User has same ID, cannot be deleted"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"audits len aclRepo: 29"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"audits len aclRepo: 29"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"user with ID 9999 not found"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"User has same ID, cannot be deleted"}
+{"level":"error","time":"2024-04-24T22:30:10+02:00","message":"user with ID 3 not found"}

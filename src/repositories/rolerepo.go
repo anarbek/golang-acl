@@ -9,18 +9,11 @@ import (
 type RolesGetFunc func(loggedInUser *models.User) []models.Role
 
 type RoleBase struct {
-	roleAbstract *RoleAbstract
+	roleAbstract IRoleRepo //*RoleAbstract
 }
 
-func (roleBase *RoleBase) Init(auditorImpl AuditInterface) {
-	var auditor = &AuditBase{}
-	// var auditorImplementation = NewAuditAbstract()
-	// auditor.Init(auditorImplementation)
-	auditor.Init(auditorImpl)
-	audits := auditor.auditInterface.AuditsAll()
-	LogErr("audits len roleRepo: %v", len(audits))
-
-	roleBase.roleAbstract = NewRoleAbstract(auditor)
+func (roleBase *RoleBase) Init(iRoleRepo IRoleRepo) {
+	roleBase.roleAbstract = iRoleRepo //NewRoleAbstract(auditor)
 }
 
 func (roleBase *RoleBase) RolesAll() []models.Role {
@@ -88,10 +81,6 @@ func (roleBase *RoleBase) InsertRole(roleToInsert *models.Role, loggedInUser *mo
 			return LogErr("role with Name %v already exists for current tenant", roleToInsert.Name)
 		}
 	}
-	// if loggedInUser.TenantID != roleToInsert.TenantID {
-	// 	return fmt.Errorf("Tenant ID should be same")
-	// }
-	// roleToInsert.TenantID = loggedInUser.TenantID
 	// Check the role permissions
 	if err := checkCurrentRolePermissions(roleToInsert, loggedInUser); err != nil {
 		return err
@@ -127,6 +116,9 @@ func NewRoleAbstract(auditor *AuditBase) *RoleAbstract {
 	roleAbstract := &RoleAbstract{}
 	roleAbstract._roleCount = len(Roles)
 	roleAbstract.auditor = auditor
+
+	audits := auditor.auditInterface.AuditsAll()
+	LogErr("audits len roleRepo: %v", len(audits))
 	return roleAbstract
 }
 

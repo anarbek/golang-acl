@@ -14,8 +14,12 @@ type RolesController struct {
 }
 
 func (u *RolesController) Init(_acl *repositories.RoleBase) {
+	var auditor = &repositories.AuditBase{}
 	var auditorImplementation = repositories.NewAuditAbstract()
-	_acl.Init(auditorImplementation)
+	// var auditorImplementation = NewAuditAbstract()
+	// auditor.Init(auditorImplementation)
+	auditor.Init(auditorImplementation)
+	_acl.Init(repositories.NewRoleAbstract(auditor))
 	u.acl = _acl
 }
 

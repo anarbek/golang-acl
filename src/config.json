@@ -1,0 +1,7 @@
+{
+	"DB_USER": "aclGoUser",
+	"DB_PASS": "aclGoPass125?!",
+	"DB_HOST": "localhost",
+	"DB_PORT": "3306",
+	"DB_NAME": "aclGoDb"
+}
