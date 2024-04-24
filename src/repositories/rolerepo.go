@@ -185,8 +185,8 @@ func checkCurrentRolePermissions(role *models.Role, loggedInUser *models.User) e
 func (acl *RoleAbstract) InsertRole(roleToInsert *models.Role, loggedInRole *models.User) error {
 
 	// Lock the mutex before accessing _userCounter
-	//acl.mu.Lock()
-	//defer acl.mu.Unlock() // Move the defer statement here
+	acl.mu.Lock()
+	defer acl.mu.Unlock() // Move the defer statement here
 
 	roleToInsert.ID = acl._roleCount + 1
 	roleToInsert.TenantID = loggedInRole.TenantID
@@ -215,8 +215,8 @@ func (acl *RoleAbstract) InsertRole(roleToInsert *models.Role, loggedInRole *mod
 func (acl *RoleAbstract) UpdateRole(roleToUpdate *models.Role, loggedInUser *models.User) error {
 
 	// Lock the mutex before accessing Users
-	//acl.mu.Lock()
-	//defer acl.mu.Unlock()
+	acl.mu.Lock()
+	defer acl.mu.Unlock()
 
 	// Find the user to update
 	for i, existingRole := range Roles {
