@@ -23,3 +23,4 @@ go.work
 #logs directory
 /logs/*
 /controllers/tests/logs/*
+/src/logs/*
