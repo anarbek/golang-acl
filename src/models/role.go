@@ -1,5 +1,7 @@
 package models
 
+import "fmt"
+
 type Role struct {
 	ID           int          `json:"id"`
 	TenantID     int          `json:"tenantId"`
@@ -8,6 +10,20 @@ type Role struct {
 	Name         string       `json:"name"`
 	Description  string       `json:"description"`
 	RolePolicies []RolePolicy `json:"rolePolicies"`
+}
+
+func (item *Role) GetID() string {
+	IDStr := fmt.Sprintf("%+v", item.ID)
+	return IDStr
+}
+
+func (item *Role) GetObjectStr() string {
+	itemStr := fmt.Sprintf("%+v", item)
+	return itemStr
+}
+
+func (item *Role) GetObjectName() string {
+	return "Role"
 }
 
 type Policy struct {

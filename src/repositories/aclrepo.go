@@ -79,8 +79,12 @@ type AclBase struct {
 
 type UsersGetFunc func(loggedInUser *models.User) []models.User
 
-func (aclBase *AclBase) Init() {
-	aclBase.acl = NewAclAbstract()
+func (aclBase *AclBase) Init(auditorImpl AuditInterface) {
+	var auditor = &AuditBase{}
+	auditor.Init(auditorImpl)
+	audits := auditor.auditInterface.AuditsAll()
+	LogErr("audits len aclRepo: %v", len(audits))
+	aclBase.acl = NewAclAbstract(auditor)
 }
 func (aclBase *AclBase) UsersWithRoles() []models.User {
 	return aclBase.acl.UsersWithRoles()
@@ -148,11 +152,13 @@ func (aclBase *AclBase) DeleteUser(id int, loggedInUser *models.User) error {
 type AclAbstract struct {
 	_userCounter int
 	mu           sync.Mutex
+	auditor      *AuditBase
 }
 
-func NewAclAbstract() *AclAbstract {
+func NewAclAbstract(auditor *AuditBase) *AclAbstract {
 	aclAbstract := &AclAbstract{}
 	aclAbstract._userCounter = len(Users)
+	aclAbstract.auditor = auditor
 	return aclAbstract
 }
 
@@ -259,7 +265,7 @@ func (acl *AclAbstract) InsertUser(user, loggedInUser *models.User) error {
 
 	// Append the new user to the Users slice
 	Users = append(Users, *user)
-
+	acl.auditor.auditInterface.CreateInsertEvent(loggedInUser.ID, user)
 	return nil
 }
 
@@ -274,10 +280,11 @@ func (acl *AclAbstract) UpdateUser(user, loggedInUser *models.User) error {
 	// Lock the mutex before accessing Users
 	acl.mu.Lock()
 	defer acl.mu.Unlock()
-
+	var itemOld *models.User
 	// Find the user to update
 	for i, existingUser := range Users {
 		if existingUser.ID == user.ID {
+			itemOld = &existingUser
 			if err := checkRolePermissions(&existingUser, loggedInUser); err != nil {
 				return err
 			}
@@ -289,6 +296,7 @@ func (acl *AclAbstract) UpdateUser(user, loggedInUser *models.User) error {
 			if err := checkRolePermissions(&Users[i], loggedInUser); err != nil {
 				return err
 			}
+			acl.auditor.auditInterface.CreateUpdateEvent(loggedInUser.ID, itemOld, user)
 			return nil
 		}
 	}
@@ -308,6 +316,7 @@ func (acl *AclAbstract) DeleteUser(id int, loggedInUser *models.User, fnGetUsers
 		if existingUser.ID == id {
 			// Delete the user
 			Users = append(Users[:i], Users[i+1:]...)
+			acl.auditor.auditInterface.CreateDeleteEvent(loggedInUser.ID, &existingUser)
 			return nil
 		}
 	}

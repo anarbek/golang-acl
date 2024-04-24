@@ -25,7 +25,8 @@ func RoleTestSetup(runMiddleware gin.HandlerFunc) RoleTestSetupObject {
 	router := gin.Default()
 	router.Use(runMiddleware) // Use the middleware
 	acl := &repositories.RoleBase{}
-	acl.Init()
+	var auditorImplementation = repositories.NewAuditAbstract()
+	acl.Init(auditorImplementation)
 	userController := &controllers.RolesController{}
 	userController.Init(acl)
 

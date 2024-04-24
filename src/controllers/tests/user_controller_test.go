@@ -25,7 +25,8 @@ func Setup(runMiddleware gin.HandlerFunc) TestSetup {
 	router := gin.Default()
 	router.Use(runMiddleware) // Use the middleware
 	acl := &repositories.AclBase{}
-	acl.Init()
+	var auditorImplementation = repositories.NewAuditAbstract()
+	acl.Init(auditorImplementation)
 	userController := &controllers.UserController{}
 	userController.Init(acl)
 

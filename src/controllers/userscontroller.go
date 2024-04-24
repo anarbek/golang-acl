@@ -18,6 +18,8 @@ type UserController struct {
 }
 
 func (u *UserController) Init(_acl *repositories.AclBase) {
+	var auditorImplementation = repositories.NewAuditAbstract()
+	_acl.Init(auditorImplementation)
 	u.acl = _acl
 }
 

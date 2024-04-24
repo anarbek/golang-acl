@@ -12,8 +12,15 @@ type RoleBase struct {
 	roleAbstract *RoleAbstract
 }
 
-func (roleBase *RoleBase) Init() {
-	roleBase.roleAbstract = NewRoleAbstract()
+func (roleBase *RoleBase) Init(auditorImpl AuditInterface) {
+	var auditor = &AuditBase{}
+	// var auditorImplementation = NewAuditAbstract()
+	// auditor.Init(auditorImplementation)
+	auditor.Init(auditorImpl)
+	audits := auditor.auditInterface.AuditsAll()
+	LogErr("audits len roleRepo: %v", len(audits))
+
+	roleBase.roleAbstract = NewRoleAbstract(auditor)
 }
 
 func (roleBase *RoleBase) RolesAll() []models.Role {
@@ -89,7 +96,6 @@ func (roleBase *RoleBase) InsertRole(roleToInsert *models.Role, loggedInUser *mo
 	if err := checkCurrentRolePermissions(roleToInsert, loggedInUser); err != nil {
 		return err
 	}
-
 	return roleBase.roleAbstract.InsertRole(roleToInsert, loggedInUser)
 }
 
@@ -114,11 +120,13 @@ func (roleBase *RoleBase) DeleteRole(id int, loggedInUser *models.User) error {
 type RoleAbstract struct {
 	_roleCount int
 	mu         sync.Mutex
+	auditor    *AuditBase
 }
 
-func NewRoleAbstract() *RoleAbstract {
+func NewRoleAbstract(auditor *AuditBase) *RoleAbstract {
 	roleAbstract := &RoleAbstract{}
 	roleAbstract._roleCount = len(Roles)
+	roleAbstract.auditor = auditor
 	return roleAbstract
 }
 
@@ -182,14 +190,14 @@ func checkCurrentRolePermissions(role *models.Role, loggedInUser *models.User) e
 	return nil
 }
 
-func (acl *RoleAbstract) InsertRole(roleToInsert *models.Role, loggedInRole *models.User) error {
+func (acl *RoleAbstract) InsertRole(roleToInsert *models.Role, loggedInUser *models.User) error {
 
 	// Lock the mutex before accessing _userCounter
 	acl.mu.Lock()
 	defer acl.mu.Unlock() // Move the defer statement here
 
 	roleToInsert.ID = acl._roleCount + 1
-	roleToInsert.TenantID = loggedInRole.TenantID
+	roleToInsert.TenantID = loggedInUser.TenantID
 	acl._roleCount++
 
 	// Append the new user to the Users slice
@@ -209,6 +217,7 @@ func (acl *RoleAbstract) InsertRole(roleToInsert *models.Role, loggedInRole *mod
 		RolePolicies = append(RolePolicies, newPolicyCopy)
 	}
 
+	acl.auditor.auditInterface.CreateInsertEvent(loggedInUser.ID, roleToInsert)
 	return nil
 }
 
@@ -217,10 +226,11 @@ func (acl *RoleAbstract) UpdateRole(roleToUpdate *models.Role, loggedInUser *mod
 	// Lock the mutex before accessing Users
 	acl.mu.Lock()
 	defer acl.mu.Unlock()
-
+	var roleOld *models.Role
 	// Find the user to update
 	for i, existingRole := range Roles {
 		if existingRole.ID == roleToUpdate.ID {
+			roleOld = &existingRole
 			if err := checkCurrentRolePermissions(&existingRole, loggedInUser); err != nil {
 				return err
 			}
@@ -259,6 +269,8 @@ func (acl *RoleAbstract) UpdateRole(roleToUpdate *models.Role, loggedInUser *mod
 			if err := checkCurrentRolePermissions(&Roles[i], loggedInUser); err != nil {
 				return err
 			}
+
+			acl.auditor.auditInterface.CreateUpdateEvent(loggedInUser.ID, roleOld, roleToUpdate)
 			return nil
 		}
 	}
@@ -268,16 +280,17 @@ func (acl *RoleAbstract) UpdateRole(roleToUpdate *models.Role, loggedInUser *mod
 
 func (acl *RoleAbstract) DeleteRole(id int, loggedInUser *models.User, fnGetRoles RolesGetFunc) error {
 
-	allUsers := fnGetRoles(loggedInUser)
+	allRoles := fnGetRoles(loggedInUser)
 	// Lock the mutex before accessing Users
 	acl.mu.Lock()
 	defer acl.mu.Unlock()
 
 	// Find the user to delete
-	for i, existingUser := range allUsers {
-		if existingUser.ID == id {
+	for i, existingRole := range allRoles {
+		if existingRole.ID == id {
 			// Delete the user
 			Users = append(Users[:i], Users[i+1:]...)
+			acl.auditor.auditInterface.CreateDeleteEvent(loggedInUser.ID, &existingRole)
 			return nil
 		}
 	}
