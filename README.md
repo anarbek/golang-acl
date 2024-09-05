@@ -36,14 +36,14 @@ kubectl expose deployment golang-acl-web-interface --type=NodePort --port=8081
 minikube service golang-acl-web-interface
 ```
 
-#using yaml in kubectl:
+## using yaml in kubectl:
 ```bash
 bring up with nodeport: kubectl apply -f golang-acl-nodeport.yaml
 bring up with load-balancer: kubectl apply -f golang-acl-load-balancer.yaml
 minikube service golang-acl-web-balancer
 ```
 
-#curl example:
+## curl example:
 ```bash
 curl -L -H "Authorization: Bearer <token>" http://127.0.0.1:56990/rndAuth
 ```
