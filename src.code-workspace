@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "src"
+		},
+		{
+			"path": "frontend/adminlte-3-angular"
+		},
+		{
+			"path": "../AdminLTE"
+		}
+	],
+	"settings": {}
+}

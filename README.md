@@ -2,9 +2,11 @@
 jwt acl example in golang
 
 ## build docker image
+```bash
 Docker build -t nr-golang-acl:1.3 .
 #cd G:\CustomProjects\GolangRelated\golang-acl\src
 #Docker build -t nr-golang-acl:1.3 .
+```
 
 ## docker compose
 cd /path/to/golang-acl/inc/DockerRelated/DockerComposeLocal
