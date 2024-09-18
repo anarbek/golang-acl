@@ -89,6 +89,12 @@ export const MENU = [
                 path: ['/roles']
             },
             {
+                name: 'Users',
+                permission: 'UserManagement.w',
+                iconClasses: 'far fa-address-book',
+                path: ['/users']
+            },
+            {
                 name: 'Sub Menu',
                 permission: 'UserManagement.r',
                 iconClasses: 'far fa-address-book',

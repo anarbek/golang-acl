@@ -4,6 +4,7 @@ import { RoleEditComponent } from './role-edit/role-edit.component';
 import 'bootstrap';
 import { RoleCreateComponent } from './role-create/role-create.component';
 import { BehaviorSubject } from 'rxjs';
+import Settings, { Config } from 'datatables.net';
 
 @Component({
   selector: 'app-roles',
@@ -74,4 +75,8 @@ export class RolesComponent implements OnInit , AfterViewInit {
       this.roleEditComponent.openEditModal(data);
     }.bind(this));*/
   }
+}
+
+declare namespace DataTables {
+  interface Settings extends Config {}
 }

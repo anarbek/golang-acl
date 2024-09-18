@@ -41,6 +41,7 @@ import { DataTablesModule } from "angular-datatables";
 import { RolesComponent } from '@pages/roles/roles.component';
 import { RoleEditComponent } from '@pages/roles/role-edit/role-edit.component';
 import { RoleCreateComponent } from '@pages/roles/role-create/role-create.component';
+import { UsersComponent } from '@pages/users/users.component';
 
 registerLocaleData(localeEn, 'en-EN');
 
@@ -69,7 +70,8 @@ registerLocaleData(localeEn, 'en-EN');
         SidebarSearchComponent,
         RolesComponent,
         RoleEditComponent,
-        RoleCreateComponent
+        RoleCreateComponent,
+        UsersComponent
     ],
     imports: [        
         FormsModule,

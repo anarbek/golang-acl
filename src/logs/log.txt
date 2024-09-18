@@ -7,3 +7,11 @@
 {"level":"error","time":"2024-04-23T20:51:54+02:00","message":"role with Name User already exists for current tenant"}
 {"level":"error","time":"2024-04-23T20:53:32+02:00","message":"role with Name User already exists for current tenant"}
 {"level":"error","time":"2024-04-23T20:53:37+02:00","message":"role with Name User already exists for current tenant"}
+{"level":"error","time":"2024-09-05T15:52:40+02:00","message":"audits len aclRepo: 0"}
+{"level":"error","time":"2024-09-05T15:52:40+02:00","message":"audits len roleRepo: 0"}
+{"level":"error","time":"2024-09-09T17:17:47+02:00","message":"audits len aclRepo: 0"}
+{"level":"error","time":"2024-09-09T17:17:47+02:00","message":"audits len roleRepo: 0"}
+{"level":"error","time":"2024-09-09T22:51:08+02:00","message":"invalid role Superadmin"}
+{"level":"error","time":"2024-09-09T22:51:17+02:00","message":"invalid role User"}
+{"level":"error","time":"2024-09-09T22:51:24+02:00","message":"invalid role Admin"}
+{"level":"error","time":"2024-09-09T22:51:26+02:00","message":"invalid role Admin"}
